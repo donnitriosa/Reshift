@@ -1,0 +1,583 @@
+/* ==========================================================================
+   Reshift CSS — Styled to mirror the aesthetics of donnitriosa.my.id
+   ========================================================================== */
+
+/* 1. CSS Reset & Variables
+   ========================================================================== */
+:root {
+    /* Colors — Light Mode */
+    --background-color: #f6f6ed;
+    --secondary-background-color: #eaedf0;
+    --text-color: #343a40;
+    --text-secondary-color: #6c757d;
+    --primary-color: #007bff;
+    --secondary-color: #ffffff; /* Card/box backgrounds */
+    --border-color: rgba(128, 128, 128, 0.15);
+    --input-bg: #ffffff;
+    --input-focus-border: rgba(0, 123, 255, 0.25);
+
+    /* Transitions */
+    --transition-fast: all 0.2s ease-in-out;
+}
+
+body.dark {
+    /* Colors — Dark Mode */
+    --background-color: #18191a;
+    --secondary-background-color: #212529;
+    --text-color: #e4e6eb;
+    --text-secondary-color: #b0b3b8;
+    --primary-color: #ffffff;
+    --secondary-color: #212529; /* Card/box backgrounds */
+    --border-color: rgba(255, 255, 255, 0.1);
+    --input-bg: #18191a;
+    --input-focus-border: rgba(255, 255, 255, 0.25);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* 2. Global Styles & Scrollbar
+   ========================================================================== */
+html, body {
+    background-color: var(--background-color) !important;
+    color: var(--text-color) !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Scrollbar styling matching reference site */
+body::-webkit-scrollbar {
+    width: 8px;
+    height: 0;
+    background-color: var(--background-color);
+}
+
+body::-webkit-scrollbar-track {
+    border-radius: 1rem;
+}
+
+body::-webkit-scrollbar-thumb {
+    border-radius: 1rem;
+    background: #b0b0b0;
+    outline: 1px solid var(--background-color);
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Manrope', sans-serif !important;
+    letter-spacing: -0.01em;
+    font-weight: 700 !important;
+}
+
+.text-muted {
+    color: var(--text-secondary-color) !important;
+}
+
+/* Selection highlight color */
+body *::selection {
+    background-color: rgba(0, 123, 255, 0.25) !important;
+    color: inherit !important;
+}
+
+/* 3. Header & Navbar
+   ========================================================================== */
+#appHeader {
+    background-color: var(--secondary-color);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.navbar {
+    padding: 1rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.navbar-brand {
+    font-family: 'Manrope', sans-serif !important;
+    font-weight: 800 !important;
+    color: var(--text-color) !important;
+    letter-spacing: -0.03em !important;
+    font-size: 1.35rem !important;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    opacity: 0.95;
+    transition: var(--transition-fast);
+}
+
+.navbar-brand:hover {
+    opacity: 1;
+    color: var(--primary-color) !important;
+}
+
+.theme-toggle-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-color);
+    cursor: pointer;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-fast);
+}
+
+.theme-toggle-btn:hover {
+    background-color: var(--secondary-background-color);
+    color: var(--primary-color);
+}
+
+/* 4. Main Container & Hero
+   ========================================================================== */
+.main-container {
+    flex: 1;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.hero {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.hero h1 {
+    font-size: 2.5rem;
+    font-weight: 800 !important;
+    line-height: 1.2;
+}
+
+.hero p {
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* 5. Mode Switcher / Tabs
+   ========================================================================== */
+.mode-selector {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.mode-tab {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    background: none;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    color: var(--text-secondary-color);
+    cursor: pointer;
+    position: relative;
+    transition: var(--transition-fast);
+}
+
+.mode-tab:hover {
+    color: var(--text-color);
+}
+
+.mode-tab.active {
+    color: var(--primary-color);
+}
+
+.mode-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: var(--primary-color);
+}
+
+.mode-tab:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* 6. Panel & Cards
+   ========================================================================== */
+.panel {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.card {
+    background-color: var(--secondary-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    transition: background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 800 !important;
+    margin-bottom: 1.5rem;
+    line-height: 1.4;
+}
+
+/* 7. Drop Zone
+   ========================================================================== */
+.drop-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: 10px;
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    background-color: var(--background-color);
+    transition: var(--transition-fast);
+}
+
+.drop-zone:hover, .drop-zone.drag-over {
+    border-color: var(--primary-color);
+    background-color: var(--secondary-background-color);
+}
+
+.drop-zone-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.upload-icon {
+    color: var(--text-secondary-color);
+    transition: var(--transition-fast);
+}
+
+.drop-zone:hover .upload-icon, .drop-zone.drag-over .upload-icon {
+    color: var(--primary-color);
+    transform: translateY(-4px);
+}
+
+.drop-zone-text {
+    font-weight: 500;
+}
+
+.browse-link {
+    color: var(--primary-color);
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+.drop-zone-subtext {
+    font-size: 0.85rem;
+    color: var(--text-secondary-color);
+}
+
+/* File Info element */
+.file-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--secondary-background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.file-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.file-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    word-break: break-all;
+}
+
+.file-size {
+    font-size: 0.85rem;
+    color: var(--text-secondary-color);
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    color: var(--text-secondary-color);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-fast);
+}
+
+.btn-icon:hover {
+    background-color: rgba(255, 0, 0, 0.1);
+    color: #ff0000;
+}
+
+/* 8. Forms & Inputs
+   ========================================================================== */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group.full-width {
+    grid-column: span 2;
+}
+
+label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary-color);
+}
+
+input[type="number"], select {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    transition: var(--transition-fast);
+    outline: none;
+    width: 100%;
+}
+
+input[type="number"]:focus, select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--input-focus-border);
+}
+
+input::placeholder {
+    color: var(--text-secondary-color);
+    opacity: 0.6;
+}
+
+.quality-slider {
+    width: 100%;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+    margin-top: 0.5rem;
+}
+
+/* 9. Buttons
+   ========================================================================== */
+.btn {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.85rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    width: 100%;
+    transition: var(--transition-fast);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: var(--secondary-color) !important;
+}
+
+.btn-primary:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+}
+
+.btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-download {
+    background-color: #28a745;
+    color: #ffffff !important;
+    text-align: center;
+}
+
+.btn-download:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
+}
+
+.btn-download:active {
+    transform: translateY(0);
+}
+
+body.dark .btn-primary {
+    background-color: #ffffff;
+    color: #18191a !important;
+}
+
+body.dark .btn-primary:hover:not(:disabled) {
+    box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
+}
+
+/* 10. Footer
+   ========================================================================== */
+#appFooter {
+    background-color: var(--secondary-color);
+    border-top: 1px solid var(--border-color);
+    padding: 1.5rem;
+    margin-top: auto;
+    text-align: center;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.footer-container p {
+    font-size: 0.9rem;
+    color: var(--text-secondary-color);
+}
+
+/* 11. Animations
+   ========================================================================== */
+.animate {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 12. Responsive Adjustments
+   ========================================================================== */
+/* 13. Image Preview
+   ========================================================================== */
+.image-preview-container {
+    margin-top: 1rem;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    background-color: var(--secondary-background-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.image-preview {
+    width: 100%;
+    max-height: 300px;
+    object-fit: contain;
+    display: block;
+    padding: 1rem;
+}
+
+.image-meta {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    border-top: 1px solid var(--border-color);
+    background-color: var(--secondary-background-color);
+}
+
+.image-dimensions {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary-color);
+    font-family: 'Inter', monospace;
+}
+
+/* 14. Aspect Ratio Checkbox
+   ========================================================================== */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary-color);
+    user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+}
+
+@media (max-width: 992px) {
+    .panel-workspace.active {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-container {
+        padding: 2rem 1rem;
+    }
+
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .form-group.full-width {
+        grid-column: span 1;
+    }
+}

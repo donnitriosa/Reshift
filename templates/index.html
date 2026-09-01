@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reshift — Image & PDF Processor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', path='image/favicon.ico') }}" type="image/x-icon">
+</head>
+<body class="light">
+    <!-- Navbar mirroring donnitriosa.my.id header layout -->
+    <header id="appHeader">
+        <nav class="navbar">
+            <div class="nav-container">
+                <a class="navbar-brand" href="/">
+                    <img src="{{ url_for('static', path='image/logo.png') }}" width="30" height="30" alt="Reshift Logo" style="border-radius: 6px; object-fit: cover;">
+                    Reshift
+                </a>
+                <button id="theme-toggle" aria-label="Toggle Dark Mode" class="theme-toggle-btn">
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="main-container">
+        <!-- Hero section explaining Reshift capabilities -->
+        <section class="hero animate">
+            <h1 class="primary-font">Fast & Simple Utility Apps</h1>
+            <p class="secondary-font text-muted">Optimize and resize your images or PDFs instantly in your browser. Fully in-memory, secure, and secure by design.</p>
+        </section>
+
+        <!-- Utility Mode Switcher -->
+        <section class="mode-selector animate">
+            <button id="btn-mode-image" class="mode-tab active">Image Mode</button>
+            <button id="btn-mode-pdf" class="mode-tab">PDF Mode</button>
+        </section>
+
+        <!-- Image Mode Panel -->
+        <div id="image-panel" class="panel animate">
+            <!-- 1. Drag & Drop Card -->
+            <section class="card upload-card">
+                <h2 class="card-title">Upload Image(s)</h2>
+                <div id="drop-zone" class="drop-zone">
+                    <div class="drop-zone-content">
+                        <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                        <p class="drop-zone-text">Drag and drop your image(s) here, or <span class="browse-link">browse</span></p>
+                        <p class="drop-zone-subtext">Supports single or batch (up to 20 images) — PNG, JPEG, WEBP</p>
+                    </div>
+                </div>
+                <input type="file" id="image-file" class="file-input" accept="image/png, image/jpeg, image/webp" multiple style="display: none;">
+                <div id="file-info" class="file-info" style="display: none;">
+                    <div class="file-details">
+                        <span id="file-name" class="file-name">filename.png</span>
+                        <span id="file-size" class="file-size">0 KB</span>
+                    </div>
+                    <button id="btn-remove-file" class="btn-icon" aria-label="Remove file">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+                <!-- Image Preview (hidden by default, shown for single file) -->
+                <div id="image-preview-container" class="image-preview-container" style="display: none;">
+                    <img id="image-preview" class="image-preview" src="" alt="Image preview">
+                    <div class="image-meta">
+                        <span id="image-dimensions" class="image-dimensions">0 × 0 px</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. Settings Card -->
+            <section class="card settings-card">
+                <h2 class="card-title">Resize & Convert Settings</h2>
+                <form id="process-form" onsubmit="return false;">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="width">Target Width (px)</label>
+                            <input type="number" id="width" min="1" placeholder="Leave empty to auto-scale">
+                        </div>
+                        <div class="form-group">
+                            <label for="height">Target Height (px)</label>
+                            <input type="number" id="height" min="1" placeholder="Leave empty to auto-scale">
+                        </div>
+                        <div class="form-group full-width">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="lock-aspect-ratio" checked>
+                                <span>Maintain Aspect Ratio</span>
+                            </label>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="format">Output Format</label>
+                            <select id="format" required>
+                                <option value="PNG">PNG</option>
+                                <option value="JPEG" selected>JPEG</option>
+                                <option value="WEBP">WEBP</option>
+                            </select>
+                        </div>
+                        <div class="form-group full-width" id="quality-group">
+                            <label for="quality">
+                                Quality: <span id="quality-value">85</span>%
+                                <span class="text-muted" style="font-size: 0.8rem; margin-left: 0.4rem;">(JPEG / WEBP only)</span>
+                            </label>
+                            <input type="range" id="quality" min="1" max="100" value="85" class="quality-slider">
+                        </div>
+                    </div>
+                    <button type="button" id="process-btn" class="btn btn-primary" disabled>Process Image</button>
+                </form>
+            </section>
+
+            <!-- 3. Result Card (hidden by default) -->
+            <section id="result-card" class="card result-card" style="display: none;">
+                <h2 class="card-title">Processed Output</h2>
+                <div class="result-details">
+                    <p id="result-text" class="result-text">Image processed successfully and ready to download.</p>
+                </div>
+                <a id="download-btn" href="#" class="btn btn-download" download>Download Output</a>
+            </section>
+        </div>
+
+        <!-- PDF Mode Panel (hidden by default) -->
+        <div id="pdf-panel" class="panel animate" style="display: none;">
+            <!-- 1. Drag & Drop Card -->
+            <section class="card upload-card">
+                <h2 class="card-title">Upload PDF</h2>
+                <div id="pdf-drop-zone" class="drop-zone">
+                    <div class="drop-zone-content">
+                        <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        <p class="drop-zone-text">Drag and drop your PDF here, or <span class="browse-link">browse</span></p>
+                        <p class="drop-zone-subtext">Supports PDF files up to 50 MB</p>
+                    </div>
+                </div>
+                <input type="file" id="pdf-file" class="file-input" accept="application/pdf" style="display: none;">
+                <div id="pdf-file-info" class="file-info" style="display: none;">
+                    <div class="file-details">
+                        <span id="pdf-file-name" class="file-name">document.pdf</span>
+                        <span id="pdf-file-size" class="file-size">0 KB</span>
+                    </div>
+                    <button id="btn-remove-pdf" class="btn-icon" aria-label="Remove PDF file">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+            </section>
+
+            <!-- 2. Settings & Action Card -->
+            <section class="card settings-card">
+                <h2 class="card-title">PDF Utilities</h2>
+                <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.95rem;">
+                    Compress images and strip metadata to shrink PDF size, or split each page into individual PDFs (ZIP download).
+                </p>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <button type="button" id="pdf-process-btn" class="btn btn-primary" style="flex: 1;" disabled>Compress PDF</button>
+                    <button type="button" id="pdf-split-btn" class="btn btn-secondary" style="flex: 1;" disabled>Split Pages (ZIP)</button>
+                </div>
+            </section>
+
+            <!-- 3. Result Card (hidden by default) -->
+            <section id="pdf-result-card" class="card result-card" style="display: none;">
+                <h2 class="card-title">PDF Output</h2>
+                <div class="result-details">
+                    <p id="pdf-result-text" class="result-text">PDF processed successfully and ready to download.</p>
+                </div>
+                <a id="pdf-download-btn" href="#" class="btn btn-download" download>Download Output</a>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer mirroring donnitriosa.my.id footer structure -->
+    <footer id="appFooter">
+        <div class="footer-container">
+            <p>&copy; 2026 Reshift. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Theme Initialization to prevent Flash of Unstyled Theme -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem("pref-theme");
+            const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            const body = document.body;
+            const sunIcon = document.querySelector(".sun-icon");
+            const moonIcon = document.querySelector(".moon-icon");
+
+            if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+                body.classList.remove("light");
+                body.classList.add("dark");
+                if (sunIcon && moonIcon) {
+                    sunIcon.style.display = "none";
+                    moonIcon.style.display = "block";
+                }
+            } else {
+                body.classList.remove("dark");
+                body.classList.add("light");
+                if (sunIcon && moonIcon) {
+                    sunIcon.style.display = "block";
+                    moonIcon.style.display = "none";
+                }
+            }
+        })();
+    </script>
+    <script src="{{ url_for('static', path='js/main.js') }}" defer></script>
+</body>
+</html>
