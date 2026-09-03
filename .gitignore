@@ -49,3 +49,7 @@ workspace/tmp/*
 # Temporary generated logo images (keep only production assets)
 static/image/Reshift5.png
 static/image/logo_transparent.png
+
+
+#note
+note.txt

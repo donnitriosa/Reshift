@@ -47,6 +47,45 @@ Build a clean, robust, and fast monolith web application for Image/PDF resizing 
 - **Execution:** Uses Vanilla JavaScript and `Fetch API` for asynchronous `POST` requests. No page reloads.
 - **Download Strategy:** Backend returns a binary file. Frontend processes the response as a `Blob`, generates an Object URL, and updates a "Download" button for the user.
 
+### Phase 5: Image Mode Enhancement
+Focus: Improve Image Mode UX and capabilities.
+
+#### 5.1 — UI Reorder: All-in-One Button Leftmost
+- **Current order:** `Compress | Resize | Convert | All-in-One`
+- **Target order:** `All-in-One | Compress | Resize | Convert`
+- **Scope:** HTML button order in `templates/index.html` only. No backend changes.
+
+#### 5.2 — Smart Compress (No Quality Percentage)
+- **Current behavior:** Compress action exposes quality slider (1–100) and passes percentage to Pillow.
+- **Target behavior:** Compress action uses **best lossless/near-lossless algorithm per format** without user-facing quality slider.
+  - **JPEG:** Use Pillow `optimize=True` with `quality=95` (visually lossless). No slider exposed.
+  - **WEBP:** Use `lossless=True` with `method=6` (best compression).
+  - **PNG:** Use `optimize=True` with `compress_level=9` (max zlib compression, fully lossless).
+- **UI change:** When Compress is selected, **hide the quality slider entirely**. The slider remains visible for Convert and All-in-One modes.
+- **Backend:** Add `smart_compress: bool` parameter to `process_image()`. When `True`, override quality/save kwargs with optimal settings per format.
+- **API contract:** `POST /process/image` and `POST /process/batch` accept optional `smart_compress` Form field (default `false`). Frontend sends `smart_compress=true` when action is "compress".
+
+#### 5.3 — PNG Compression Support
+- **Current behavior:** PNG is lossless; quality parameter is ignored. Compress mode with PNG does nothing meaningful.
+- **Target behavior:** PNG compression uses `optimize=True` + `compress_level=9` for maximum lossless size reduction.
+- **Implementation:** Handled as part of 5.2 smart compress. When format is PNG:
+  - `img.save(buffer, format="PNG", optimize=True, compress_level=9)`
+- **Validation:** Compare output file size vs input — if output ≥ input, return original bytes (no point returning a larger file).
+
+#### 5.4 — Crop Image Feature
+- **New action button:** Add `Crop` to the Image Utilities action group.
+- **Button order after this phase:** `All-in-One | Compress | Resize | Convert | Crop` (All-in-One stays leftmost).
+- **UI:** When Crop is selected, show crop parameters:
+  - `left` (x offset), `top` (y offset), `right`, `bottom` — all in pixels.
+  - Input fields with placeholder text explaining the crop box coordinates.
+  - Live preview of crop dimensions if single image is uploaded (text display: "Crop area: W×H px").
+- **Backend:**
+  - Add `crop_image(image, left, top, right, bottom)` function in `utils/image_processor.py`.
+  - Validate: `left < right`, `top < bottom`, all values ≥ 0, `right ≤ image.width`, `bottom ≤ image.height`.
+  - Uses `image.crop((left, top, right, bottom))`.
+- **API:** `POST /process/image` accepts optional `crop_left`, `crop_top`, `crop_right`, `crop_bottom` Form fields. Crop is applied **before** resize (if both present in All-in-One).
+- **Batch support:** `POST /process/batch` also accepts crop parameters — same crop box applied uniformly to all images. Validation skips images smaller than the crop box.
+
 ---
 
 ## Critical Constraints

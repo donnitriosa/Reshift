@@ -64,33 +64,74 @@
                 </div>
                 <!-- Image Preview (hidden by default, shown for single file) -->
                 <div id="image-preview-container" class="image-preview-container" style="display: none;">
-                    <img id="image-preview" class="image-preview" src="" alt="Image preview">
+                    <div id="crop-stage" class="image-preview-wrapper" style="padding: 1rem;">
+                        <img id="image-preview" class="image-preview" src="" alt="Image preview">
+                        <div id="crop-overlay" class="crop-overlay">
+                            <div class="crop-handle nw" data-handle="nw"></div>
+                            <div class="crop-handle n"  data-handle="n"></div>
+                            <div class="crop-handle ne" data-handle="ne"></div>
+                            <div class="crop-handle e"  data-handle="e"></div>
+                            <div class="crop-handle se" data-handle="se"></div>
+                            <div class="crop-handle s"  data-handle="s"></div>
+                            <div class="crop-handle sw" data-handle="sw"></div>
+                            <div class="crop-handle w"  data-handle="w"></div>
+                        </div>
+                    </div>
                     <div class="image-meta">
                         <span id="image-dimensions" class="image-dimensions">0 × 0 px</span>
                     </div>
                 </div>
             </section>
 
-            <!-- 2. Settings Card -->
+            <!-- 2. Image Utilities Card (always visible, buttons disabled until upload) -->
             <section class="card settings-card">
-                <h2 class="card-title">Resize & Convert Settings</h2>
+                <h2 class="card-title">Image Utilities</h2>
+                <p class="text-muted" style="margin-bottom: 1rem; font-size: 0.95rem;">
+                    Select an operation mode, adjust settings, then process your image(s).
+                </p>
+                <div class="action-btn-group" style="margin-bottom: 1.5rem;">
+                    <button type="button" class="btn btn-secondary img-action-btn" data-action="all" disabled>All-in-One</button>
+                    <button type="button" class="btn btn-secondary img-action-btn" data-action="compress" disabled>Compress</button>
+                    <button type="button" class="btn btn-secondary img-action-btn" data-action="resize" disabled>Resize</button>
+                    <button type="button" class="btn btn-secondary img-action-btn" data-action="convert" disabled>Convert</button>
+                    <button type="button" class="btn btn-secondary img-action-btn" data-action="crop" disabled>Crop</button>
+                </div>
                 <form id="process-form" onsubmit="return false;">
-                    <div class="form-grid">
-                        <div class="form-group">
+                    <div id="image-settings-area" class="form-grid" style="display: none;">
+                        <div class="form-group" data-for="resize all">
                             <label for="width">Target Width (px)</label>
                             <input type="number" id="width" min="1" placeholder="Leave empty to auto-scale">
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" data-for="resize all">
                             <label for="height">Target Height (px)</label>
                             <input type="number" id="height" min="1" placeholder="Leave empty to auto-scale">
                         </div>
-                        <div class="form-group full-width">
+                        <div class="form-group full-width" data-for="resize all">
                             <label class="checkbox-label">
                                 <input type="checkbox" id="lock-aspect-ratio" checked>
                                 <span>Maintain Aspect Ratio</span>
                             </label>
                         </div>
-                        <div class="form-group full-width">
+                        <div class="form-group" data-for="crop all">
+                            <label for="crop-left">Crop Left (X1, px)</label>
+                            <input type="number" id="crop-left" min="0" placeholder="0">
+                        </div>
+                        <div class="form-group" data-for="crop all">
+                            <label for="crop-top">Crop Top (Y1, px)</label>
+                            <input type="number" id="crop-top" min="0" placeholder="0">
+                        </div>
+                        <div class="form-group" data-for="crop all">
+                            <label for="crop-right">Crop Right (X2, px)</label>
+                            <input type="number" id="crop-right" min="1" placeholder="Max width">
+                        </div>
+                        <div class="form-group" data-for="crop all">
+                            <label for="crop-bottom">Crop Bottom (Y2, px)</label>
+                            <input type="number" id="crop-bottom" min="1" placeholder="Max height">
+                        </div>
+                        <div class="form-group full-width" id="crop-preview-group" data-for="crop all" style="display: none;">
+                            <span id="crop-dimensions" class="image-dimensions" style="font-size: 0.85rem;">Crop area: 0 × 0 px</span>
+                        </div>
+                        <div class="form-group full-width" data-for="convert all">
                             <label for="format">Output Format</label>
                             <select id="format" required>
                                 <option value="PNG">PNG</option>
@@ -98,7 +139,7 @@
                                 <option value="WEBP">WEBP</option>
                             </select>
                         </div>
-                        <div class="form-group full-width" id="quality-group">
+                        <div class="form-group full-width" id="quality-group" data-for="compress convert all">
                             <label for="quality">
                                 Quality: <span id="quality-value">85</span>%
                                 <span class="text-muted" style="font-size: 0.8rem; margin-left: 0.4rem;">(JPEG / WEBP only)</span>
@@ -106,7 +147,7 @@
                             <input type="range" id="quality" min="1" max="100" value="85" class="quality-slider">
                         </div>
                     </div>
-                    <button type="button" id="process-btn" class="btn btn-primary" disabled>Process Image</button>
+                    <button type="button" id="process-btn" class="btn btn-primary" style="display: none;" disabled>Process Image</button>
                 </form>
             </section>
 

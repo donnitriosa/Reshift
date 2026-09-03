@@ -79,6 +79,11 @@ def create_app() -> FastAPI:
         height: int | None = Form(default=None),
         output_format: str = Form(...),
         quality: int = Form(default=85, ge=1, le=100),
+        smart_compress: bool = Form(default=False),
+        crop_left: int | None = Form(default=None, ge=0),
+        crop_top: int | None = Form(default=None, ge=0),
+        crop_right: int | None = Form(default=None, ge=1),
+        crop_bottom: int | None = Form(default=None, ge=1),
     ) -> StreamingResponse:
         """Endpoint to handle image resizing, conversion, and compression requests."""
         # 1. Validate File Size
@@ -114,6 +119,11 @@ def create_app() -> FastAPI:
                 width=width,
                 height=height,
                 quality=quality,
+                smart_compress=smart_compress,
+                crop_left=crop_left,
+                crop_top=crop_top,
+                crop_right=crop_right,
+                crop_bottom=crop_bottom,
             )
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e)) from e
@@ -142,6 +152,11 @@ def create_app() -> FastAPI:
         quality: int = Form(default=85, ge=1, le=100),
         width: int | None = Form(default=None),
         height: int | None = Form(default=None),
+        smart_compress: bool = Form(default=False),
+        crop_left: int | None = Form(default=None, ge=0),
+        crop_top: int | None = Form(default=None, ge=0),
+        crop_right: int | None = Form(default=None, ge=1),
+        crop_bottom: int | None = Form(default=None, ge=1),
     ) -> StreamingResponse:
         """Endpoint to handle batch image processing returning a ZIP archive."""
         if not files or len(files) == 0:
@@ -182,6 +197,11 @@ def create_app() -> FastAPI:
                         width=width,
                         height=height,
                         quality=quality,
+                        smart_compress=smart_compress,
+                        crop_left=crop_left,
+                        crop_top=crop_top,
+                        crop_right=crop_right,
+                        crop_bottom=crop_bottom,
                     )
                     orig_stem = Path(file.filename or f"image_{idx + 1}").stem
                     out_filename = f"{orig_stem}-Reshift.{ext}"
