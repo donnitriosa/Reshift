@@ -222,6 +222,15 @@
         </div>
     </footer>
 
+    <!-- Trakteer Overlay Button (floating bottom-right, opens donation modal) -->
+    <script type="text/javascript" src="https://edge-cdn.trakteer.id/js/trbtn-overlay.min.js?v=14-05-2025"></script>
+    <script type="text/javascript" class="troverlay">
+        (function () {
+            var trbtnId = trbtnOverlay.init('Dukung Saya di Trakteer', '#be1e2d', 'https://trakteer.id/v1/donni_triosa/tip/embed/modal', 'https://edge-cdn.trakteer.id/images/embed/trbtn-icon.png?v=14-05-2025', '40', 'floating-right');
+            trbtnOverlay.draw(trbtnId);
+        })();
+    </script>
+
     <!-- Theme Initialization to prevent Flash of Unstyled Theme -->
     <script>
         (function() {

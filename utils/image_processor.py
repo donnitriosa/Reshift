@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import io
+import os
 from PIL import Image, UnidentifiedImageError
 
 SUPPORTED_FORMATS: set[str] = {"PNG", "JPEG", "WEBP"}
-MAX_FILE_BYTES: int = 20 * 1024 * 1024  # 20 MB
+MAX_FILE_BYTES: int = int(os.environ.get("MAX_FILE_MB", "20")) * 1024 * 1024
 
 
 def validate_format(fmt: str) -> str:

@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import io
+import os
 import uuid
 import zipfile
 from pathlib import Path
 import fitz  # PyMuPDF
 
-MAX_PDF_BYTES: int = 50 * 1024 * 1024  # 50 MB limit
+MAX_PDF_BYTES: int = int(os.environ.get("MAX_PDF_MB", "50")) * 1024 * 1024
 LARGE_PDF_THRESHOLD: int = 10 * 1024 * 1024  # 10 MB threshold for disk staging
 
 

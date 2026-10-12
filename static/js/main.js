@@ -728,4 +728,33 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+
+    // ── Floating Button Clearance ─────────────────────────────────────────
+    // Lift the Trakteer button by however much the footer has scrolled into
+    // view, so it never covers the footer text. `bottom` is set inline: the
+    // widget appends its own stylesheet at draw time, and an inline style
+    // wins regardless of stylesheet order.
+    const appFooter = document.getElementById("appFooter");
+    const BASE_BOTTOM = 20; // matches Trakteer's own floating offset
+    let floatingBtn = null;
+
+    function updateFloatingClearance() {
+        if (!floatingBtn || !appFooter) return;
+        const footerVisible = window.innerHeight - appFooter.getBoundingClientRect().top;
+        const lift = Math.max(0, Math.round(footerVisible));
+        floatingBtn.style.setProperty("bottom", (BASE_BOTTOM + lift) + "px", "important");
+    }
+
+    // The widget inserts its container asynchronously after the deferred
+    // script runs, so wait for it before measuring.
+    const floatingBtnPoll = setInterval(() => {
+        floatingBtn = document.querySelector(".trbtn-overlay-container.floating-right");
+        if (floatingBtn) {
+            clearInterval(floatingBtnPoll);
+            updateFloatingClearance();
+        }
+    }, 100);
+
+    window.addEventListener("scroll", updateFloatingClearance, { passive: true });
+    window.addEventListener("resize", updateFloatingClearance);
 });

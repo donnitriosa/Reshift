@@ -529,6 +529,23 @@ body.dark .btn-primary:hover:not(:disabled) {
     color: var(--text-secondary-color);
 }
 
+/* Trakteer overlay button — original pill, pinned bottom-right.
+   The widget appends its own <style> to <head> at draw time, so overrides
+   need !important plus equal-or-higher specificity.
+   Only the horizontal offset and stacking are set here; main.js sets `bottom`
+   inline so it can lift the button clear of the footer. */
+.trbtn-overlay-container.floating-right {
+    right: 1.25rem !important;
+    z-index: 999 !important;
+    transition: bottom 0.2s ease-in-out;
+}
+
+@media (max-width: 480px) {
+    .trbtn-overlay-container.floating-right {
+        right: 0.75rem !important;
+    }
+}
+
 /* 11. Animations
    ========================================================================== */
 .animate {

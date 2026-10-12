@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import os
 import shutil
 import zipfile
 from collections.abc import AsyncGenerator
@@ -25,7 +26,7 @@ from utils.validators import validate_magic_bytes
 WORKSPACE_TMP: Path = Path("workspace/tmp")
 TEMPLATES_DIR: Path = Path("templates")
 STATIC_DIR: Path = Path("static")
-MAX_BATCH_FILES: int = 20
+MAX_BATCH_FILES: int = int(os.environ.get("MAX_BATCH_FILES", "20"))
 
 # Rate Limiter setup
 limiter = Limiter(key_func=get_remote_address)
@@ -69,6 +70,11 @@ def create_app() -> FastAPI:
         return templates.TemplateResponse(
             request=request, name="index.html", context={}
         )
+
+    @app.get("/health")
+    async def health() -> dict[str, str]:
+        """Liveness probe for Docker and Dokploy health checks."""
+        return {"status": "ok"}
 
     @app.post("/process/image")
     @limiter.limit("20/minute")

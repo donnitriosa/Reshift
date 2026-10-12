@@ -28,6 +28,7 @@
 ## Features
 
 ### Image Processing
+
 - **Format Conversion:** Convert images between **PNG**, **JPEG**, and **WEBP**.
 - **Resize & Aspect Ratio:** Custom target width/height with smart aspect ratio preservation.
 - **Quality Control:** Adjustable compression quality slider (1–100%) for JPEG and WEBP outputs.
@@ -35,11 +36,13 @@
 - **Live Preview:** Instant image preview with pixel dimensions and size metadata.
 
 ### PDF Processing
+
 - **PDF Compression:** Compress internal image streams, strip unused metadata, and optimize PDF structure.
 - **Page Splitting:** Split multi-page PDFs into individual single-page PDF files bundled inside a ZIP archive.
 - **Smart Staging:** Small PDFs process entirely in-memory; large PDFs (> 10 MB) utilize temporary staging with automatic cleanup.
 
 ### Security & UX
+
 - **Magic Bytes Validation:** Binary header validation (`\x89PNG`, `\xff\xd8\xff`, `RIFF...WEBP`, `%PDF-`) preventing MIME-spoofing attacks.
 - **Rate Limiting:** Per-IP request limits powered by `slowapi` to prevent abuse.
 - **Modern Responsive UI:** Clean interface with Light/Dark mode toggle and Drag-and-Drop upload support.
@@ -49,42 +52,47 @@
 
 ## Tech Stack
 
-| Category | Technology |
-| --- | --- |
-| **Backend** | Python 3.10+, FastAPI, Uvicorn |
-| **Frontend** | Jinja2 Templates, Vanilla JavaScript, Custom CSS |
-| **Image Processing** | Pillow (PIL) |
-| **PDF Processing** | PyMuPDF (fitz) |
-| **Security & Rate Limiting** | slowapi |
-| **Packaging** | Standard library `zipfile` & `io.BytesIO` |
+| Category                     | Technology                                       |
+| ---------------------------- | ------------------------------------------------ |
+| **Backend**                  | Python 3.10+, FastAPI, Uvicorn                   |
+| **Frontend**                 | Jinja2 Templates, Vanilla JavaScript, Custom CSS |
+| **Image Processing**         | Pillow (PIL)                                     |
+| **PDF Processing**           | PyMuPDF (fitz)                                   |
+| **Security & Rate Limiting** | slowapi                                          |
+| **Packaging**                | Standard library `zipfile` & `io.BytesIO`        |
 
 ---
 
 ## Quick Start
 
 ### Prerequisites
+
 - Python 3.10 or higher
 
 ### Installation
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/user/Reshift.git
    cd Reshift
    ```
 
 2. **Create and activate a virtual environment:**
+
    ```bash
    python3 -m venv .venv
    source .venv/bin/activate
    ```
 
 3. **Install dependencies:**
+
    ```bash
    pip install -r requirements.txt
    ```
 
 4. **Run the application:**
+
    ```bash
    uvicorn main:app --reload
    ```
@@ -96,23 +104,23 @@
 
 ## API Endpoints
 
-| Method | Endpoint | Description | Rate Limit |
-| --- | --- | --- | --- |
-| `GET` | `/` | Main web UI dashboard | — |
-| `POST` | `/process/image` | Process single image (resize, convert, compress) | 20 / min |
-| `POST` | `/process/batch` | Batch process multiple images → returns ZIP archive | 10 / min |
-| `POST` | `/process/pdf` | Compress PDF file & strip metadata | 10 / min |
-| `POST` | `/process/pdf/split` | Split PDF into individual single-page PDFs → returns ZIP | 10 / min |
+| Method | Endpoint             | Description                                              | Rate Limit |
+| ------ | -------------------- | -------------------------------------------------------- | ---------- |
+| `GET`  | `/`                  | Main web UI dashboard                                    | —          |
+| `POST` | `/process/image`     | Process single image (resize, convert, compress)         | 20 / min   |
+| `POST` | `/process/batch`     | Batch process multiple images → returns ZIP archive      | 10 / min   |
+| `POST` | `/process/pdf`       | Compress PDF file & strip metadata                       | 10 / min   |
+| `POST` | `/process/pdf/split` | Split PDF into individual single-page PDFs → returns ZIP | 10 / min   |
 
 ---
 
 ## Technical Limits
 
-| Resource | Limit |
-| --- | --- |
-| Max Image File Size | **20 MB** per image |
-| Max PDF File Size | **50 MB** per document |
-| Max Batch Files | **20 files** per request |
+| Resource                   | Limit                                       |
+| -------------------------- | ------------------------------------------- |
+| Max Image File Size        | **20 MB** per image                         |
+| Max PDF File Size          | **50 MB** per document                      |
+| Max Batch Files            | **20 files** per request                    |
 | PDF Disk Staging Threshold | **10 MB** (files below this stay in-memory) |
 
 ---
@@ -124,12 +132,12 @@ Reshift implements defense-in-depth measures to handle untrusted file uploads sa
 1. **Binary Signature Verification (Magic Bytes):**
    Validation is performed on raw byte headers before handing data to Pillow or PyMuPDF, rejecting disguised malicious payloads.
 
-   | Format | Magic Bytes Signature |
-   | --- | --- |
-   | **PNG** | `\x89PNG\r\n\x1a\n` |
-   | **JPEG** | `\xff\xd8\xff` |
-   | **WEBP** | `RIFF....WEBP` |
-   | **PDF** | `%PDF-` |
+   | Format   | Magic Bytes Signature |
+   | -------- | --------------------- |
+   | **PNG**  | `\x89PNG\r\n\x1a\n`   |
+   | **JPEG** | `\xff\xd8\xff`        |
+   | **WEBP** | `RIFF....WEBP`        |
+   | **PDF**  | `%PDF-`               |
 
 2. **Per-IP Rate Limiting:** Rate limits enforced at router level return HTTP 429 when threshold is exceeded.
 3. **Automatic Workspace Cleanup:** Temporary staging files in `workspace/tmp/` are automatically wiped on application startup via FastAPI lifespan hooks and cleaned up immediately post-response using `BackgroundTask`.
@@ -142,11 +150,7 @@ Reshift implements defense-in-depth measures to handle untrusted file uploads sa
 Reshift/
 ├── main.py              # Application entry point & FastAPI routes
 ├── requirements.txt     # Python dependencies
-├── TASKS.md             # Project roadmap & progress tracker
 ├── README.md            # Project documentation
-├── docs/                # Architecture & workflow documentation
-│   ├── ARCHITECTURE.md
-│   └── WORKFLOWS.md
 ├── utils/               # Core processing engines
 │   ├── image_processor.py   # Pillow image manipulation
 │   ├── pdf_processor.py     # PyMuPDF compression & splitting
