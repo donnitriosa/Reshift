@@ -47,6 +47,18 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     yield
 
 
+def unique_name(name: str, used: set[str]) -> str:
+    """Returns name, adding a -2, -3, ... suffix if already used. Records the result in used."""
+    path = Path(name)
+    candidate: str = name
+    counter: int = 2
+    while candidate in used:
+        candidate = f"{path.stem}-{counter}{path.suffix}"
+        counter += 1
+    used.add(candidate)
+    return candidate
+
+
 def create_app() -> FastAPI:
     """Factory function to initialize and configure the FastAPI application."""
     app = FastAPI(
@@ -202,6 +214,7 @@ def create_app() -> FastAPI:
         if ext == "jpeg":
             ext = "jpg"
 
+        used_names: set[str] = set()
         with zipfile.ZipFile(zip_buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
             for idx, file in enumerate(files):
                 file_bytes: bytes = await file.read()
@@ -234,7 +247,7 @@ def create_app() -> FastAPI:
                     )
                     orig_stem = Path(file.filename or f"image_{idx + 1}").stem
                     out_filename = f"{orig_stem}-Reshift.{ext}"
-                    zf.writestr(out_filename, img_buffer.getvalue())
+                    zf.writestr(unique_name(out_filename, used_names), img_buffer.getvalue())
                 except Exception:
                     continue
 
