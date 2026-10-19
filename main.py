@@ -27,6 +27,7 @@ WORKSPACE_TMP: Path = Path("workspace/tmp")
 TEMPLATES_DIR: Path = Path("templates")
 STATIC_DIR: Path = Path("static")
 MAX_BATCH_FILES: int = int(os.environ.get("MAX_BATCH_FILES", "20"))
+SITE_URL: str = os.environ.get("SITE_URL", "https://reshift.donnitriosa.my.id").rstrip("/")
 
 # Rate Limiter setup
 limiter = Limiter(key_func=get_remote_address)
@@ -68,13 +69,35 @@ def create_app() -> FastAPI:
     async def index(request: Request) -> HTMLResponse:
         """Renders the main frontend interface."""
         return templates.TemplateResponse(
-            request=request, name="index.html", context={}
+            request=request, name="index.html", context={"site_url": SITE_URL}
         )
 
     @app.get("/health")
     async def health() -> dict[str, str]:
         """Liveness probe for Docker and Dokploy health checks."""
         return {"status": "ok"}
+
+    @app.get("/robots.txt", include_in_schema=False)
+    async def robots() -> Response:
+        """Tells crawlers which paths to index and where the sitemap lives."""
+        body: str = (
+            "User-agent: *\n"
+            "Allow: /\n"
+            "Disallow: /process/\n"
+            f"Sitemap: {SITE_URL}/sitemap.xml\n"
+        )
+        return Response(content=body, media_type="text/plain")
+
+    @app.get("/sitemap.xml", include_in_schema=False)
+    async def sitemap() -> Response:
+        """Single-URL sitemap for the main page."""
+        body: str = (
+            '<?xml version="1.0" encoding="UTF-8"?>\n'
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+            f"  <url><loc>{SITE_URL}/</loc></url>\n"
+            "</urlset>\n"
+        )
+        return Response(content=body, media_type="application/xml")
 
     @app.post("/process/image")
     @limiter.limit("20/minute")
