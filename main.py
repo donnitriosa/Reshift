@@ -4,7 +4,7 @@ import io
 import os
 import shutil
 import zipfile
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -28,6 +28,7 @@ TEMPLATES_DIR: Path = Path("templates")
 STATIC_DIR: Path = Path("static")
 MAX_BATCH_FILES: int = int(os.environ.get("MAX_BATCH_FILES", "20"))
 SITE_URL: str = os.environ.get("SITE_URL", "https://reshift.donnitriosa.my.id").rstrip("/")
+NOINDEX: bool = os.environ.get("NOINDEX", "false").lower() == "true"
 
 # Rate Limiter setup
 limiter = Limiter(key_func=get_remote_address)
@@ -77,11 +78,21 @@ def create_app() -> FastAPI:
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
     templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
+    @app.middleware("http")
+    async def add_noindex_header(request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
+        """Sends X-Robots-Tag noindex on every response when NOINDEX is enabled (staging)."""
+        response: Response = await call_next(request)
+        if NOINDEX:
+            response.headers["X-Robots-Tag"] = "noindex, nofollow"
+        return response
+
     @app.get("/", response_class=HTMLResponse)
     async def index(request: Request) -> HTMLResponse:
         """Renders the main frontend interface."""
         return templates.TemplateResponse(
-            request=request, name="index.html", context={"site_url": SITE_URL}
+            request=request,
+            name="index.html",
+            context={"site_url": SITE_URL, "noindex": NOINDEX},
         )
 
     @app.get("/health")
@@ -92,12 +103,9 @@ def create_app() -> FastAPI:
     @app.get("/robots.txt", include_in_schema=False)
     async def robots() -> Response:
         """Tells crawlers which paths to index and where the sitemap lives."""
-        body: str = (
-            "User-agent: *\n"
-            "Allow: /\n"
-            "Disallow: /process/\n"
-            f"Sitemap: {SITE_URL}/sitemap.xml\n"
-        )
+        body: str = "User-agent: *\nAllow: /\nDisallow: /process/\n"
+        if not NOINDEX:
+            body += f"Sitemap: {SITE_URL}/sitemap.xml\n"
         return Response(content=body, media_type="text/plain")
 
     @app.get("/sitemap.xml", include_in_schema=False)
