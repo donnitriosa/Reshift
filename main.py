@@ -4,7 +4,7 @@ import io
 import os
 import shutil
 import zipfile
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -28,6 +28,7 @@ TEMPLATES_DIR: Path = Path("templates")
 STATIC_DIR: Path = Path("static")
 MAX_BATCH_FILES: int = int(os.environ.get("MAX_BATCH_FILES", "20"))
 SITE_URL: str = os.environ.get("SITE_URL", "https://reshift.donnitriosa.my.id").rstrip("/")
+NOINDEX: bool = os.environ.get("NOINDEX", "false").lower() == "true"
 
 # Rate Limiter setup
 limiter = Limiter(key_func=get_remote_address)
@@ -45,6 +46,18 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """FastAPI lifespan context manager for startup and shutdown events."""
     cleanup_tmp()
     yield
+
+
+def unique_name(name: str, used: set[str]) -> str:
+    """Returns name, adding a -2, -3, ... suffix if already used. Records the result in used."""
+    path = Path(name)
+    candidate: str = name
+    counter: int = 2
+    while candidate in used:
+        candidate = f"{path.stem}-{counter}{path.suffix}"
+        counter += 1
+    used.add(candidate)
+    return candidate
 
 
 def create_app() -> FastAPI:
@@ -65,11 +78,21 @@ def create_app() -> FastAPI:
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
     templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
+    @app.middleware("http")
+    async def add_noindex_header(request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
+        """Sends X-Robots-Tag noindex on every response when NOINDEX is enabled (staging)."""
+        response: Response = await call_next(request)
+        if NOINDEX:
+            response.headers["X-Robots-Tag"] = "noindex, nofollow"
+        return response
+
     @app.get("/", response_class=HTMLResponse)
     async def index(request: Request) -> HTMLResponse:
         """Renders the main frontend interface."""
         return templates.TemplateResponse(
-            request=request, name="index.html", context={"site_url": SITE_URL}
+            request=request,
+            name="index.html",
+            context={"site_url": SITE_URL, "noindex": NOINDEX},
         )
 
     @app.get("/health")
@@ -80,12 +103,9 @@ def create_app() -> FastAPI:
     @app.get("/robots.txt", include_in_schema=False)
     async def robots() -> Response:
         """Tells crawlers which paths to index and where the sitemap lives."""
-        body: str = (
-            "User-agent: *\n"
-            "Allow: /\n"
-            "Disallow: /process/\n"
-            f"Sitemap: {SITE_URL}/sitemap.xml\n"
-        )
+        body: str = "User-agent: *\nAllow: /\nDisallow: /process/\n"
+        if not NOINDEX:
+            body += f"Sitemap: {SITE_URL}/sitemap.xml\n"
         return Response(content=body, media_type="text/plain")
 
     @app.get("/sitemap.xml", include_in_schema=False)
@@ -202,6 +222,7 @@ def create_app() -> FastAPI:
         if ext == "jpeg":
             ext = "jpg"
 
+        used_names: set[str] = set()
         with zipfile.ZipFile(zip_buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
             for idx, file in enumerate(files):
                 file_bytes: bytes = await file.read()
@@ -234,7 +255,7 @@ def create_app() -> FastAPI:
                     )
                     orig_stem = Path(file.filename or f"image_{idx + 1}").stem
                     out_filename = f"{orig_stem}-Reshift.{ext}"
-                    zf.writestr(out_filename, img_buffer.getvalue())
+                    zf.writestr(unique_name(out_filename, used_names), img_buffer.getvalue())
                 except Exception:
                     continue
 

@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import pytest
 from fastapi.testclient import TestClient
 
+import main
 from main import SITE_URL, app
 
 client = TestClient(app)
@@ -20,6 +22,13 @@ def test_sitemap_lists_canonical_url() -> None:
     assert response.headers["content-type"].startswith("application/xml")
     assert f"<loc>{SITE_URL}/</loc>" in response.text
 
+
+def test_noindex_mode_blocks_indexing(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(main, "NOINDEX", True)
+    response = client.get("/")
+    assert response.headers["x-robots-tag"] == "noindex, nofollow"
+    assert 'name="robots" content="noindex, nofollow"' in response.text
+    assert "Sitemap:" not in client.get("/robots.txt").text
 
 def test_index_has_seo_tags() -> None:
     html = client.get("/").text
