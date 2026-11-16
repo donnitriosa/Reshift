@@ -8,11 +8,16 @@
     <meta name="robots" content="{{ 'noindex, nofollow' if noindex else 'index, follow' }}">
     <link rel="canonical" href="{{ site_url }}/">
     <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Reshift">
     <meta property="og:title" content="Reshift — Free Online Image & PDF Compressor, Resizer, Converter">
     <meta property="og:description" content="Compress, resize, convert and crop images, and compress or split PDFs. Free, no signup.">
     <meta property="og:url" content="{{ site_url }}/">
     <meta property="og:image" content="{{ site_url }}/static/image/Reshift5.png">
+    <meta property="og:image:alt" content="Reshift online image and PDF utility interface">
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Reshift — Free Online Image & PDF Compressor, Resizer, Converter">
+    <meta name="twitter:description" content="Compress, resize, convert and crop images, and compress or split PDFs. Free, no signup.">
+    <meta name="twitter:image" content="{{ site_url }}/static/image/Reshift5.png">
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -22,6 +27,20 @@
         "description": "Free online tool to compress, resize, convert and crop images, and compress or split PDF files.",
         "applicationCategory": "MultimediaApplication",
         "operatingSystem": "Any",
+        "author": {
+            "@type": "Person",
+            "name": "Donni Triosa",
+            "url": "https://donnitriosa.my.id"
+        },
+        "featureList": [
+            "Smart lossless and near-lossless image compression for PNG, JPEG, and WEBP",
+            "Aspect-ratio preserving image resize",
+            "Image format conversion between PNG, JPEG, and WEBP",
+            "Interactive pixel-accurate image crop",
+            "Batch image processing with ZIP archive download",
+            "PDF file size compression and metadata stripping",
+            "PDF page splitting into individual PDFs in a ZIP archive"
+        ],
         "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}
     }
     </script>
@@ -51,7 +70,7 @@
     <main class="main-container">
         <!-- Hero section explaining Reshift capabilities -->
         <section class="hero animate">
-            <h1 class="primary-font">Fast & Simple Utility Apps</h1>
+            <h1 class="primary-font">Free Online Image &amp; PDF Compressor, Resizer, and Converter</h1>
             <p class="secondary-font text-muted">Optimize and resize your images or PDFs instantly in your browser. Fully in-memory, private, and secure by design.</p>
         </section>
 
@@ -234,12 +253,31 @@
                 <a id="pdf-download-btn" href="#" class="btn btn-download" download>Download Output</a>
             </section>
         </div>
+
+        <!-- Semantic Feature & Privacy Overview for Users & Search Crawlers -->
+        <section class="card seo-content animate" aria-labelledby="features-heading">
+            <h2 id="features-heading" class="card-title">Why Use Reshift for Image &amp; PDF Optimization?</h2>
+            <div class="seo-grid">
+                <div class="seo-item">
+                    <h3>Smart Image Compression &amp; Conversion</h3>
+                    <p class="text-muted">Reduce file size for PNG, JPEG, and WEBP images using format-optimal lossless and visually lossless algorithms. Convert formats, resize with aspect-ratio lock, crop with an interactive rule-of-thirds overlay, or process up to 20 images at once into a single ZIP archive.</p>
+                </div>
+                <div class="seo-item">
+                    <h3>Fast PDF Compression &amp; Page Splitting</h3>
+                    <p class="text-muted">Shrink large PDF documents up to 50 MB by deflating internal streams, images, and fonts while stripping unused metadata. Need separate pages? Split any multi-page PDF into individual single-page PDF files packaged in a clean ZIP download.</p>
+                </div>
+                <div class="seo-item">
+                    <h3>Private In-Memory Processing</h3>
+                    <p class="text-muted">No account or signup required. Image processing runs strictly in RAM using in-memory buffers, and temporary staging for large PDFs is automatically purged after download so your files stay private.</p>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- Footer mirroring donnitriosa.my.id footer structure -->
     <footer id="appFooter">
         <div class="footer-container">
-            <p>&copy; 2026 Reshift. All rights reserved.</p>
+            <p>&copy; 2026 Reshift by <a href="https://donnitriosa.my.id" class="footer-link" rel="noopener">Donni Triosa</a>. All rights reserved.</p>
         </div>
     </footer>
 

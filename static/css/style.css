@@ -529,6 +529,34 @@ body.dark .btn-primary:hover:not(:disabled) {
     color: var(--text-secondary-color);
 }
 
+.footer-link {
+    color: var(--text-color);
+    font-weight: 600;
+    text-decoration: underline;
+    transition: var(--transition-fast);
+}
+
+.footer-link:hover {
+    color: var(--primary-color);
+}
+
+.seo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.seo-item h3 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.seo-item p {
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
 /* Trakteer overlay button — original pill, pinned bottom-right.
    The widget appends its own <style> to <head> at draw time, so overrides
    need !important plus equal-or-higher specificity.
@@ -722,5 +750,10 @@ body.dark .btn-primary:hover:not(:disabled) {
 
     .form-group.full-width {
         grid-column: span 1;
+    }
+
+    .seo-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
     }
 }
