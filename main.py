@@ -86,7 +86,7 @@ def create_app() -> FastAPI:
             response.headers["X-Robots-Tag"] = "noindex, nofollow"
         return response
 
-    @app.get("/", response_class=HTMLResponse)
+    @app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
     async def index(request: Request) -> HTMLResponse:
         """Renders the main frontend interface."""
         return templates.TemplateResponse(
@@ -95,12 +95,12 @@ def create_app() -> FastAPI:
             context={"site_url": SITE_URL, "noindex": NOINDEX},
         )
 
-    @app.get("/health")
+    @app.api_route("/health", methods=["GET", "HEAD"])
     async def health() -> dict[str, str]:
         """Liveness probe for Docker and Dokploy health checks."""
         return {"status": "ok"}
 
-    @app.get("/robots.txt", include_in_schema=False)
+    @app.api_route("/robots.txt", methods=["GET", "HEAD"], include_in_schema=False)
     async def robots() -> Response:
         """Tells crawlers which paths to index and where the sitemap lives."""
         body: str = "User-agent: *\nAllow: /\nDisallow: /process/\n"
@@ -108,7 +108,7 @@ def create_app() -> FastAPI:
             body += f"Sitemap: {SITE_URL}/sitemap.xml\n"
         return Response(content=body, media_type="text/plain")
 
-    @app.get("/sitemap.xml", include_in_schema=False)
+    @app.api_route("/sitemap.xml", methods=["GET", "HEAD"], include_in_schema=False)
     async def sitemap() -> Response:
         """Single-URL sitemap for the main page."""
         body: str = (
