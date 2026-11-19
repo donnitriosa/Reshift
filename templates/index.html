@@ -80,6 +80,12 @@
             <button id="btn-mode-pdf" class="mode-tab">PDF Mode</button>
         </section>
 
+        <!-- Inline Dismissible Error Banner -->
+        <div id="error-banner" class="error-banner" role="alert" aria-live="polite" style="display: none;">
+            <span id="error-banner-text" class="error-banner-text"></span>
+            <button type="button" id="error-banner-close" class="btn-icon error-banner-close" aria-label="Dismiss error">&times;</button>
+        </div>
+
         <!-- Image Mode Panel -->
         <div id="image-panel" class="panel animate">
             <!-- 1. Drag & Drop Card -->
@@ -212,15 +218,15 @@
         <div id="pdf-panel" class="panel animate" style="display: none;">
             <!-- 1. Drag & Drop Card -->
             <section class="card upload-card">
-                <h2 class="card-title">Upload PDF</h2>
+                <h2 class="card-title">Upload PDF(s)</h2>
                 <div id="pdf-drop-zone" class="drop-zone">
                     <div class="drop-zone-content">
                         <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                        <p class="drop-zone-text">Drag and drop your PDF here, or <span class="browse-link">browse</span></p>
-                        <p class="drop-zone-subtext">Supports PDF files up to 50 MB</p>
+                        <p class="drop-zone-text">Drag and drop your PDF(s) here, or <span class="browse-link">browse</span></p>
+                        <p class="drop-zone-subtext">Drop or browse PDFs — add multiple at once or one by one (up to 50 MB total)</p>
                     </div>
                 </div>
-                <input type="file" id="pdf-file" class="file-input" accept="application/pdf" style="display: none;">
+                <input type="file" id="pdf-file" class="file-input" accept="application/pdf" multiple style="display: none;">
                 <div id="pdf-file-info" class="file-info" style="display: none;">
                     <div class="file-details">
                         <span id="pdf-file-name" class="file-name">document.pdf</span>
@@ -230,17 +236,33 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                     </button>
                 </div>
+                <ul id="pdf-file-list" class="pdf-file-list" style="display: none;"></ul>
             </section>
 
             <!-- 2. Settings & Action Card -->
             <section class="card settings-card">
                 <h2 class="card-title">PDF Utilities</h2>
                 <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.95rem;">
-                    Compress images and strip metadata to shrink PDF size, or split each page into individual PDFs (ZIP download).
+                    Compress PDFs, split or extract specific page ranges, render pages as images, or merge multiple PDFs into one.
                 </p>
-                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                    <button type="button" id="pdf-process-btn" class="btn btn-primary" style="flex: 1;" disabled>Compress PDF</button>
-                    <button type="button" id="pdf-split-btn" class="btn btn-secondary" style="flex: 1;" disabled>Split Pages (ZIP)</button>
+                <div class="form-grid" style="margin-bottom: 1.5rem;">
+                    <div class="form-group">
+                        <label for="pdf-page-range">Page Range (Split / Images)</label>
+                        <input type="text" id="pdf-page-range" placeholder="e.g. 1-3, 5 (empty = all pages)">
+                    </div>
+                    <div class="form-group">
+                        <label for="pdf-image-format">Image Format (PDF to Images)</label>
+                        <select id="pdf-image-format">
+                            <option value="PNG" selected>PNG</option>
+                            <option value="JPEG">JPEG</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.75rem;">
+                    <button type="button" id="pdf-process-btn" class="btn btn-primary" disabled>Compress PDF</button>
+                    <button type="button" id="pdf-split-btn" class="btn btn-secondary" disabled>Split Pages (ZIP)</button>
+                    <button type="button" id="pdf-to-images-btn" class="btn btn-secondary" disabled>PDF to Images (ZIP)</button>
+                    <button type="button" id="pdf-merge-btn" class="btn btn-secondary" disabled>Merge PDFs</button>
                 </div>
             </section>
 
@@ -278,6 +300,11 @@
     <footer id="appFooter">
         <div class="footer-container">
             <p>&copy; 2026 Reshift by <a href="https://donnitriosa.my.id" class="footer-link" rel="noopener">Donni Triosa</a>. All rights reserved.</p>
+            <nav class="footer-nav" aria-label="Legal navigation">
+                <a href="/privacy" class="footer-link">Privacy Policy</a>
+                <span class="footer-sep" aria-hidden="true">&middot;</span>
+                <a href="/terms" class="footer-link">Terms &amp; Conditions</a>
+            </nav>
         </div>
     </footer>
 

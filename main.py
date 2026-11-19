@@ -9,17 +9,19 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request, UploadFile, File, Form, HTTPException
+from fastapi.exception_handlers import http_exception_handler
 from fastapi.responses import HTMLResponse, StreamingResponse, FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.background import BackgroundTask
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
 from utils.image_processor import process_image, MAX_FILE_BYTES, SUPPORTED_FORMATS
-from utils.pdf_processor import compress_pdf, split_pdf, MAX_PDF_BYTES
+from utils.pdf_processor import compress_pdf, split_pdf, merge_pdfs, pdf_to_images, MAX_PDF_BYTES
 from utils.validators import validate_magic_bytes
 
 # Constants
@@ -78,6 +80,18 @@ def create_app() -> FastAPI:
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
     templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
+    @app.exception_handler(StarletteHTTPException)
+    async def custom_http_exception_handler(request: Request, exc: StarletteHTTPException) -> Response:
+        """Renders custom 404 HTML page for browser routes while keeping JSON errors for API routes."""
+        if exc.status_code == 404 and not request.url.path.startswith("/process/"):
+            return templates.TemplateResponse(
+                request=request,
+                name="404.html",
+                context={"site_url": SITE_URL, "noindex": True},
+                status_code=404,
+            )
+        return await http_exception_handler(request, exc)
+
     @app.middleware("http")
     async def add_noindex_header(request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
         """Sends X-Robots-Tag noindex on every response when NOINDEX is enabled (staging)."""
@@ -92,6 +106,24 @@ def create_app() -> FastAPI:
         return templates.TemplateResponse(
             request=request,
             name="index.html",
+            context={"site_url": SITE_URL, "noindex": NOINDEX},
+        )
+
+    @app.api_route("/privacy", methods=["GET", "HEAD"], response_class=HTMLResponse)
+    async def privacy(request: Request) -> HTMLResponse:
+        """Renders the Privacy Policy page."""
+        return templates.TemplateResponse(
+            request=request,
+            name="privacy.html",
+            context={"site_url": SITE_URL, "noindex": NOINDEX},
+        )
+
+    @app.api_route("/terms", methods=["GET", "HEAD"], response_class=HTMLResponse)
+    async def terms(request: Request) -> HTMLResponse:
+        """Renders the Terms and Conditions page."""
+        return templates.TemplateResponse(
+            request=request,
+            name="terms.html",
             context={"site_url": SITE_URL, "noindex": NOINDEX},
         )
 
@@ -110,11 +142,13 @@ def create_app() -> FastAPI:
 
     @app.api_route("/sitemap.xml", methods=["GET", "HEAD"], include_in_schema=False)
     async def sitemap() -> Response:
-        """Single-URL sitemap for the main page."""
+        """Sitemap for the main page and legal pages."""
         body: str = (
             '<?xml version="1.0" encoding="UTF-8"?>\n'
             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
             f"  <url><loc>{SITE_URL}/</loc></url>\n"
+            f"  <url><loc>{SITE_URL}/privacy</loc></url>\n"
+            f"  <url><loc>{SITE_URL}/terms</loc></url>\n"
             "</urlset>\n"
         )
         return Response(content=body, media_type="application/xml")
@@ -223,6 +257,7 @@ def create_app() -> FastAPI:
             ext = "jpg"
 
         used_names: set[str] = set()
+        processed_count: int = 0
         with zipfile.ZipFile(zip_buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
             for idx, file in enumerate(files):
                 file_bytes: bytes = await file.read()
@@ -256,8 +291,15 @@ def create_app() -> FastAPI:
                     orig_stem = Path(file.filename or f"image_{idx + 1}").stem
                     out_filename = f"{orig_stem}-Reshift.{ext}"
                     zf.writestr(unique_name(out_filename, used_names), img_buffer.getvalue())
+                    processed_count += 1
                 except Exception:
                     continue
+
+        if processed_count == 0:
+            raise HTTPException(
+                status_code=400,
+                detail="No valid images could be processed with the given settings.",
+            )
 
         zip_buffer.seek(0)
         return StreamingResponse(
@@ -320,6 +362,7 @@ def create_app() -> FastAPI:
     async def split_pdf_endpoint(
         request: Request,
         file: UploadFile = File(...),
+        page_range: str | None = Form(default=None),
     ) -> StreamingResponse:
         """Endpoint to split PDF into per-page PDF files inside a ZIP archive."""
         file_bytes: bytes = await file.read()
@@ -337,13 +380,110 @@ def create_app() -> FastAPI:
         orig_stem: str = Path(file.filename or "document").stem
 
         try:
-            zip_buffer = split_pdf(file_bytes, orig_stem=orig_stem)
+            zip_buffer = split_pdf(file_bytes, orig_stem=orig_stem, page_range=page_range)
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e)) from e
         except Exception as e:
             raise HTTPException(status_code=500, detail="Internal PDF splitting error.") from e
 
         filename: str = f"{orig_stem}-Reshift-pages.zip"
+        return StreamingResponse(
+            zip_buffer,
+            media_type="application/zip",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+        )
+
+    @app.post("/process/pdf/merge")
+    @limiter.limit("10/minute")
+    async def merge_pdf_endpoint(
+        request: Request,
+        files: list[UploadFile] = File(...),
+    ) -> Response:
+        """Endpoint to merge multiple PDFs into a single PDF document."""
+        if not files or len(files) < 2:
+            raise HTTPException(status_code=400, detail="Please upload at least 2 PDF files to merge.")
+
+        if len(files) > MAX_BATCH_FILES:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Batch size exceeds maximum limit of {MAX_BATCH_FILES} files."
+            )
+
+        pdf_bytes_list: list[bytes] = []
+        total_size: int = 0
+        for file in files:
+            file_bytes: bytes = await file.read()
+            total_size += len(file_bytes)
+            if total_size > MAX_PDF_BYTES:
+                raise HTTPException(
+                    status_code=413,
+                    detail=f"Total PDF size exceeds limit of {MAX_PDF_BYTES // (1024 * 1024)} MB."
+                )
+            try:
+                validate_magic_bytes(file_bytes, "PDF")
+            except ValueError:
+                raise HTTPException(status_code=400, detail=f"Invalid PDF header signature: {file.filename or 'file'}.")
+            pdf_bytes_list.append(file_bytes)
+
+        try:
+            output_result, mode = merge_pdfs(pdf_bytes_list, WORKSPACE_TMP)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+        except Exception as e:
+            raise HTTPException(status_code=500, detail="Internal PDF merging error.") from e
+
+        headers: dict[str, str] = {"Content-Disposition": 'attachment; filename="Reshift-merged.pdf"'}
+        if mode == "file" and isinstance(output_result, Path):
+            cleanup_task = BackgroundTask(lambda: output_result.unlink(missing_ok=True))
+            return FileResponse(
+                path=output_result,
+                media_type="application/pdf",
+                headers=headers,
+                background=cleanup_task,
+            )
+
+        return StreamingResponse(
+            output_result,
+            media_type="application/pdf",
+            headers=headers,
+        )
+
+    @app.post("/process/pdf/to-images")
+    @limiter.limit("10/minute")
+    async def pdf_to_images_endpoint(
+        request: Request,
+        file: UploadFile = File(...),
+        output_format: str = Form(default="PNG"),
+        page_range: str | None = Form(default=None),
+    ) -> StreamingResponse:
+        """Endpoint to render selected PDF pages into PNG or JPEG images inside a ZIP archive."""
+        file_bytes: bytes = await file.read()
+        if len(file_bytes) > MAX_PDF_BYTES:
+            raise HTTPException(
+                status_code=413,
+                detail=f"PDF size exceeds limit of {MAX_PDF_BYTES // (1024 * 1024)} MB."
+            )
+
+        try:
+            validate_magic_bytes(file_bytes, "PDF")
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid PDF file header signature.")
+
+        orig_stem: str = Path(file.filename or "document").stem
+
+        try:
+            zip_buffer = pdf_to_images(
+                file_bytes=file_bytes,
+                orig_stem=orig_stem,
+                image_format=output_format,
+                page_range=page_range,
+            )
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+        except Exception as e:
+            raise HTTPException(status_code=500, detail="Internal PDF rendering error.") from e
+
+        filename: str = f"{orig_stem}-Reshift-images.zip"
         return StreamingResponse(
             zip_buffer,
             media_type="application/zip",

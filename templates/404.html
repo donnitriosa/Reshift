@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 Page Not Found — Reshift</title>
+    <meta name="description" content="The requested page or file could not be found on Reshift.">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', path='image/favicon.ico') }}" type="image/x-icon">
+</head>
+<body class="light">
+    <!-- Navbar mirroring donnitriosa.my.id header layout -->
+    <header id="appHeader">
+        <nav class="navbar">
+            <div class="nav-container">
+                <a class="navbar-brand" href="/">
+                    <img src="{{ url_for('static', path='image/logo.png') }}" width="30" height="30" alt="Reshift Logo" style="border-radius: 6px; object-fit: cover;">
+                    Reshift
+                </a>
+                <button id="theme-toggle" aria-label="Toggle Dark Mode" class="theme-toggle-btn">
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="main-container">
+        <section class="card error-404-card animate">
+            <div class="inspector-404-window">
+                <div class="inspector-404-header">
+                    <div class="inspector-404-title-group">
+                        <span class="inspector-badge">ERR_404</span>
+                        <code id="missing-path" class="inspector-path">/404</code>
+                    </div>
+                    <span class="inspector-dim">0 &times; 0 px &middot; 0 B</span>
+                </div>
+
+                <div class="inspector-404-stage">
+                    <div class="inspector-crop-box">
+                        <div class="crop-grid-line h1"></div>
+                        <div class="crop-grid-line h2"></div>
+                        <div class="crop-grid-line v1"></div>
+                        <div class="crop-grid-line v2"></div>
+                        <div class="crop-handle nw"></div>
+                        <div class="crop-handle ne"></div>
+                        <div class="crop-handle se"></div>
+                        <div class="crop-handle sw"></div>
+
+                        <div class="error-404-code primary-font">404</div>
+                        <div class="error-404-subcode">FRAME OUT OF BOUNDS</div>
+                    </div>
+                </div>
+
+                <div class="inspector-404-diagnostics">
+                    <div class="diag-row">
+                        <span class="diag-label">Signature</span>
+                        <span class="diag-val diag-err">0x00000000 (Unidentified)</span>
+                    </div>
+                    <div class="diag-row">
+                        <span class="diag-label">Buffer</span>
+                        <span class="diag-val">io.BytesIO(0) &mdash; Empty</span>
+                    </div>
+                    <div class="diag-row">
+                        <span class="diag-label">Timestamp</span>
+                        <span id="current-date" class="diag-val">UTC</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="error-404-actions">
+                <h1 class="primary-font error-404-title">Whoops! Frame Out of Bounds</h1>
+                <p class="text-muted error-404-text">The route you requested lies outside the canvas dimensions or has been purged from memory.</p>
+                <a href="/" class="btn btn-primary error-404-btn">Back to Image &amp; PDF Tools</a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer mirroring donnitriosa.my.id footer structure -->
+    <footer id="appFooter">
+        <div class="footer-container">
+            <p>&copy; 2026 Reshift by <a href="https://donnitriosa.my.id" class="footer-link" rel="noopener">Donni Triosa</a>. All rights reserved.</p>
+            <nav class="footer-nav" aria-label="Legal navigation">
+                <a href="/privacy" class="footer-link">Privacy Policy</a>
+                <span class="footer-sep" aria-hidden="true">&middot;</span>
+                <a href="/terms" class="footer-link">Terms &amp; Conditions</a>
+            </nav>
+        </div>
+    </footer>
+
+    <!-- Trakteer Overlay Button (floating bottom-right, opens donation modal) -->
+    <script type="text/javascript" src="https://edge-cdn.trakteer.id/js/trbtn-overlay.min.js?v=14-05-2025"></script>
+    <script type="text/javascript" class="troverlay">
+        (function () {
+            var trbtnId = trbtnOverlay.init('Dukung Saya di Trakteer', '#be1e2d', 'https://trakteer.id/v1/donni_triosa/tip/embed/modal', 'https://edge-cdn.trakteer.id/images/embed/trbtn-icon.png?v=14-05-2025', '40', 'floating-right');
+            trbtnOverlay.draw(trbtnId);
+        })();
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const pathEl = document.getElementById("missing-path");
+            if (pathEl) {
+                pathEl.textContent = window.location.pathname || "/404";
+            }
+            const dateEl = document.getElementById("current-date");
+            if (dateEl) {
+                const now = new Date();
+                const wib = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+                dateEl.textContent = wib.toUTCString().replace("GMT", "GMT+0700 (WIB)");
+            }
+        });
+    </script>
+
+    <!-- Theme Initialization to prevent Flash of Unstyled Theme -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem("pref-theme");
+            const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            const body = document.body;
+            const sunIcon = document.querySelector(".sun-icon");
+            const moonIcon = document.querySelector(".moon-icon");
+
+            if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+                body.classList.remove("light");
+                body.classList.add("dark");
+                if (sunIcon && moonIcon) {
+                    sunIcon.style.display = "none";
+                    moonIcon.style.display = "block";
+                }
+            } else {
+                body.classList.remove("dark");
+                body.classList.add("light");
+                if (sunIcon && moonIcon) {
+                    sunIcon.style.display = "block";
+                    moonIcon.style.display = "none";
+                }
+            }
+        })();
+    </script>
+    <script src="{{ url_for('static', path='js/main.js') }}" defer></script>
+</body>
+</html>
