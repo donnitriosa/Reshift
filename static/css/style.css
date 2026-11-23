@@ -373,7 +373,7 @@ label {
     color: var(--text-secondary-color);
 }
 
-input[type="number"], select {
+input[type="number"], input[type="text"], select {
     font-family: 'Inter', sans-serif;
     font-size: 0.95rem;
     padding: 0.75rem 1rem;
@@ -386,7 +386,7 @@ input[type="number"], select {
     width: 100%;
 }
 
-input[type="number"]:focus, select:focus {
+input[type="number"]:focus, input[type="text"]:focus, select:focus {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px var(--input-focus-border);
 }
@@ -540,6 +540,63 @@ body.dark .btn-primary:hover:not(:disabled) {
     color: var(--primary-color);
 }
 
+.footer-nav {
+    margin-top: 0.4rem;
+    font-size: 0.85rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.footer-sep {
+    color: var(--text-secondary-color);
+}
+
+.legal-card h1 {
+    font-size: 2rem;
+    margin-bottom: 0.35rem;
+}
+
+.legal-updated {
+    font-size: 0.85rem;
+    margin-bottom: 1.75rem;
+}
+
+.legal-card h2 {
+    font-size: 1.15rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.legal-card p,
+.legal-card li {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--text-secondary-color);
+}
+
+.legal-card ul {
+    padding-left: 1.25rem;
+    margin-top: 0.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
 .seo-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -632,6 +689,7 @@ body.dark .btn-primary:hover:not(:disabled) {
     box-sizing: border-box;
     display: none;
     z-index: 10;
+    touch-action: none;
 }
 
 /* Rule of Thirds (3x3 / 9-Grid Lines) */
@@ -756,4 +814,317 @@ body.dark .btn-primary:hover:not(:disabled) {
         grid-template-columns: 1fr;
         gap: 1.25rem;
     }
+
+    .inspector-404-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.4rem;
+    }
+
+    .diag-row {
+        flex-direction: column;
+        gap: 0.15rem;
+    }
+}
+
+/* 15. Custom 404 Canvas & Memory Inspector
+   ========================================================================== */
+.error-404-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    text-align: center;
+}
+
+.inspector-404-window {
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    background-color: var(--background-color);
+    text-align: left;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.inspector-404-window:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+}
+
+body.dark .inspector-404-window:hover {
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+}
+
+.inspector-404-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background-color: var(--secondary-background-color);
+    border-bottom: 1px solid var(--border-color);
+    gap: 1rem;
+}
+
+.inspector-404-title-group {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+}
+
+.inspector-badge {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: 5px;
+    background-color: rgba(220, 53, 69, 0.14);
+    color: #dc3545;
+    flex-shrink: 0;
+}
+
+body.dark .inspector-badge {
+    background-color: rgba(248, 113, 113, 0.18);
+    color: #f87171;
+}
+
+.inspector-path {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.85rem;
+    color: var(--text-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.inspector-dim {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.8rem;
+    color: var(--text-secondary-color);
+    flex-shrink: 0;
+}
+
+.inspector-404-stage {
+    padding: 2.5rem 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image:
+        linear-gradient(45deg, rgba(128, 128, 128, 0.07) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(128, 128, 128, 0.07) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(128, 128, 128, 0.07) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(128, 128, 128, 0.07) 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+}
+
+.inspector-crop-box {
+    position: relative;
+    padding: 2rem 3.5rem;
+    border: 2px dashed #007bff;
+    background-color: rgba(0, 123, 255, 0.04);
+    text-align: center;
+}
+
+body.dark .inspector-crop-box {
+    border-color: #60a5fa;
+    background-color: rgba(96, 165, 250, 0.06);
+}
+
+.inspector-crop-box .crop-grid-line.h1,
+.inspector-crop-box .crop-grid-line.h2 {
+    border-top-color: rgba(0, 123, 255, 0.25);
+}
+
+.inspector-crop-box .crop-grid-line.v1,
+.inspector-crop-box .crop-grid-line.v2 {
+    border-left-color: rgba(0, 123, 255, 0.25);
+}
+
+body.dark .inspector-crop-box .crop-grid-line.h1,
+body.dark .inspector-crop-box .crop-grid-line.h2 {
+    border-top-color: rgba(96, 165, 250, 0.25);
+}
+
+body.dark .inspector-crop-box .crop-grid-line.v1,
+body.dark .inspector-crop-box .crop-grid-line.v2 {
+    border-left-color: rgba(96, 165, 250, 0.25);
+}
+
+.error-404-code {
+    position: relative;
+    z-index: 1;
+    font-size: 4.25rem;
+    font-weight: 800 !important;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--text-color);
+}
+
+.error-404-subcode {
+    position: relative;
+    z-index: 1;
+    margin-top: 0.5rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: #007bff;
+}
+
+body.dark .error-404-subcode {
+    color: #60a5fa;
+}
+
+.inspector-404-diagnostics {
+    padding: 0.9rem 1rem;
+    background-color: var(--secondary-background-color);
+    border-top: 1px solid var(--border-color);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.82rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.diag-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.diag-label {
+    color: var(--text-secondary-color);
+}
+
+.diag-val {
+    color: var(--text-color);
+    word-break: break-word;
+}
+
+.diag-err {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+body.dark .diag-err {
+    color: #f87171;
+}
+
+.error-404-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    max-width: 480px;
+}
+
+.error-404-title {
+    font-size: 1.65rem;
+}
+
+.error-404-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.error-404-btn {
+    width: auto;
+    margin-top: 0.5rem;
+    padding: 0.85rem 2rem;
+}
+
+/* 16. Inline Error Banner
+   ========================================================================== */
+.error-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 1.15rem;
+    border-radius: 10px;
+    background-color: rgba(220, 53, 69, 0.1);
+    border: 1px solid rgba(220, 53, 69, 0.35);
+    color: #b02a37;
+    font-size: 0.92rem;
+    font-weight: 500;
+}
+
+body.dark .error-banner {
+    background-color: rgba(248, 113, 113, 0.14);
+    border-color: rgba(248, 113, 113, 0.35);
+    color: #f87171;
+}
+
+.error-banner-text {
+    flex: 1;
+    line-height: 1.45;
+}
+
+.error-banner-close {
+    color: inherit;
+    font-size: 1.25rem;
+    line-height: 1;
+    padding: 0.15rem 0.4rem;
+}
+
+/* 17. PDF Merge Queue List
+   ========================================================================== */
+.pdf-file-list {
+    list-style: none;
+    margin-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.pdf-file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0.9rem;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.pdf-item-left {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+}
+
+.pdf-item-index {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+.pdf-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+}
+
+.btn-order {
+    padding: 0.2rem 0.45rem;
+    font-size: 0.85rem;
+    color: var(--text-color);
+}
+
+.btn-order:hover:not(:disabled) {
+    background-color: var(--secondary-background-color);
+    color: var(--primary-color);
+}
+
+.btn-order:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
 }

@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import io
 import os
-from PIL import Image, UnidentifiedImageError
+from PIL import Image, ImageOps, UnidentifiedImageError
 
 SUPPORTED_FORMATS: set[str] = {"PNG", "JPEG", "WEBP"}
 MAX_FILE_BYTES: int = int(os.environ.get("MAX_FILE_MB", "20")) * 1024 * 1024
+MAX_IMAGE_PIXELS: int = 50_000_000
+Image.MAX_IMAGE_PIXELS = MAX_IMAGE_PIXELS
 
 
 def validate_format(fmt: str) -> str:
@@ -116,10 +118,19 @@ def process_image(
 
     try:
         with Image.open(io.BytesIO(file_bytes)) as img:
-            processed_img: Image.Image = img.copy()
+            orig_fmt: str = (img.format or "").upper()
+            processed_img: Image.Image = ImageOps.exif_transpose(img).copy()
+
+            has_crop: bool = (
+                crop_left is not None
+                and crop_top is not None
+                and crop_right is not None
+                and crop_bottom is not None
+            )
+            has_resize: bool = width is not None or height is not None
 
             # Apply crop before resize
-            if crop_left is not None and crop_top is not None and crop_right is not None and crop_bottom is not None:
+            if has_crop:
                 processed_img = crop_image(processed_img, crop_left, crop_top, crop_right, crop_bottom)
 
             # Apply resize
@@ -135,7 +146,9 @@ def process_image(
                 if result is not None:
                     mime_type: str = f"image/{fmt.lower()}"
                     return result, mime_type
-                # Fallback: compression didn't reduce size, return standard save
+                if not has_crop and not has_resize and orig_fmt == fmt:
+                    return io.BytesIO(file_bytes), f"image/{fmt.lower()}"
+                # Fallback: compression didn't reduce size after dimension edit, return standard save
                 output_buffer: io.BytesIO = io.BytesIO()
                 processed_img.save(output_buffer, format=fmt)
                 output_buffer.seek(0)
@@ -154,5 +167,7 @@ def process_image(
 
             return output_buffer, mime_type
 
+    except Image.DecompressionBombError as e:
+        raise ValueError("Image dimensions exceed maximum safe pixel limit (50 MP).") from e
     except UnidentifiedImageError as e:
         raise ValueError("Invalid image file format or corrupted file.") from e

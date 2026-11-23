@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy — Reshift</title>
+    <meta name="description" content="Privacy Policy for Reshift. Learn how images and PDFs are processed in memory with zero permanent storage and no user tracking.">
+    <meta name="robots" content="{{ 'noindex, nofollow' if noindex else 'index, follow' }}">
+    <link rel="canonical" href="{{ site_url }}/privacy">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Reshift">
+    <meta property="og:title" content="Privacy Policy — Reshift">
+    <meta property="og:description" content="Privacy Policy for Reshift. Learn how images and PDFs are processed in memory with zero permanent storage and no user tracking.">
+    <meta property="og:url" content="{{ site_url }}/privacy">
+    <meta property="og:image" content="{{ site_url }}/static/image/Reshift5.png">
+    <meta property="og:image:alt" content="Reshift online image and PDF utility interface">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Privacy Policy — Reshift">
+    <meta name="twitter:description" content="Privacy Policy for Reshift. Learn how images and PDFs are processed in memory with zero permanent storage and no user tracking.">
+    <meta name="twitter:image" content="{{ site_url }}/static/image/Reshift5.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', path='image/favicon.ico') }}" type="image/x-icon">
+</head>
+<body class="light">
+    <!-- Navbar mirroring donnitriosa.my.id header layout -->
+    <header id="appHeader">
+        <nav class="navbar">
+            <div class="nav-container">
+                <a class="navbar-brand" href="/">
+                    <img src="{{ url_for('static', path='image/logo.png') }}" width="30" height="30" alt="Reshift Logo" style="border-radius: 6px; object-fit: cover;">
+                    Reshift
+                </a>
+                <button id="theme-toggle" aria-label="Toggle Dark Mode" class="theme-toggle-btn">
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="main-container">
+        <section class="card legal-card animate">
+            <a href="/" class="back-link">&larr; Back to Reshift Tools</a>
+            <h1 class="primary-font">Privacy Policy</h1>
+            <p class="text-muted legal-updated">Last updated: November 2026</p>
+
+            <h2>1. Overview &amp; Zero-Account Policy</h2>
+            <p>Reshift (<a href="{{ site_url }}/" class="footer-link">{{ site_url }}</a>) is a free browser-accessible image and PDF utility. No account registration, login, email address, or personal profile is required or collected.</p>
+
+            <h2>2. How Uploaded Files Are Processed</h2>
+            <ul>
+                <li><strong>Images (PNG, JPEG, WEBP):</strong> Processed strictly in memory (<code>io.BytesIO</code> in RAM) and streamed directly back to your browser. Image files are never written to disk or permanent storage.</li>
+                <li><strong>PDF Documents:</strong> Processed in memory when output size is 10 MB or smaller. Large PDFs (over 10 MB up to 50 MB) are temporarily staged in an isolated runtime directory (<code>workspace/tmp/</code>) solely to stream the download, deleted immediately after response delivery via a background cleanup task, and wiped automatically whenever the server starts (<code>cleanup_tmp()</code>).</li>
+                <li><strong>Zero Inspection &amp; Zero AI Training:</strong> Uploaded files are never viewed, shared, sold, archived, or used to train machine learning or AI models.</li>
+            </ul>
+
+            <h2>3. Rate Limiting &amp; Technical Logs</h2>
+            <p>To protect service availability, client IP addresses are evaluated transiently in memory (<code>slowapi</code>) to enforce per-minute rate limits (20 requests/minute for single images; 10 requests/minute for batch image and PDF endpoints).</p>
+
+            <h2>4. Local Storage &amp; Third-Party Services</h2>
+            <ul>
+                <li><strong>Theme Preference:</strong> Reshift uses browser <code>localStorage</code> (<code>pref-theme</code>) solely to remember your light or dark mode choice. No tracking or advertising cookies are set by Reshift.</li>
+                <li><strong>External Assets:</strong> Typography is loaded from Google Fonts (<code>fonts.googleapis.com</code> / <code>fonts.gstatic.com</code>), and an optional floating support widget is loaded from Trakteer (<code>edge-cdn.trakteer.id</code>).</li>
+            </ul>
+
+            <h2>5. Contact</h2>
+            <p>Questions about this Privacy Policy can be directed to <strong>Donni Triosa</strong> via <a href="https://donnitriosa.my.id" class="footer-link" rel="noopener">donnitriosa.my.id</a>.</p>
+        </section>
+    </main>
+
+    <!-- Footer mirroring donnitriosa.my.id footer structure -->
+    <footer id="appFooter">
+        <div class="footer-container">
+            <p>&copy; 2026 Reshift by <a href="https://donnitriosa.my.id" class="footer-link" rel="noopener">Donni Triosa</a>. All rights reserved.</p>
+            <nav class="footer-nav" aria-label="Legal navigation">
+                <a href="/privacy" class="footer-link">Privacy Policy</a>
+                <span class="footer-sep" aria-hidden="true">&middot;</span>
+                <a href="/terms" class="footer-link">Terms &amp; Conditions</a>
+            </nav>
+        </div>
+    </footer>
+
+    <!-- Trakteer Overlay Button (floating bottom-right, opens donation modal) -->
+    <script type="text/javascript" src="https://edge-cdn.trakteer.id/js/trbtn-overlay.min.js?v=14-05-2025"></script>
+    <script type="text/javascript" class="troverlay">
+        (function () {
+            var trbtnId = trbtnOverlay.init('Dukung Saya di Trakteer', '#be1e2d', 'https://trakteer.id/v1/donni_triosa/tip/embed/modal', 'https://edge-cdn.trakteer.id/images/embed/trbtn-icon.png?v=14-05-2025', '40', 'floating-right');
+            trbtnOverlay.draw(trbtnId);
+        })();
+    </script>
+
+    <!-- Theme Initialization to prevent Flash of Unstyled Theme -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem("pref-theme");
+            const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            const body = document.body;
+            const sunIcon = document.querySelector(".sun-icon");
+            const moonIcon = document.querySelector(".moon-icon");
+
+            if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+                body.classList.remove("light");
+                body.classList.add("dark");
+                if (sunIcon && moonIcon) {
+                    sunIcon.style.display = "none";
+                    moonIcon.style.display = "block";
+                }
+            } else {
+                body.classList.remove("dark");
+                body.classList.add("light");
+                if (sunIcon && moonIcon) {
+                    sunIcon.style.display = "block";
+                    moonIcon.style.display = "none";
+                }
+            }
+        })();
+    </script>
+    <script src="{{ url_for('static', path='js/main.js') }}" defer></script>
+</body>
+</html>
