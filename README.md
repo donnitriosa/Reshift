@@ -5,14 +5,17 @@
 </p>
 
 <p align="center">
-  <strong>Fast, In-Memory Image & PDF Processing Utility Web Application</strong>
+  <strong>Fast, In-Memory Image &amp; PDF Processing Utility Web Application</strong><br />
+  Live at <a href="https://reshift.donnitriosa.my.id/">reshift.donnitriosa.my.id</a>
 </p>
 
 <p align="center">
   <a href="#features">Features</a> •
   <a href="#tech-stack">Tech Stack</a> •
   <a href="#quick-start">Quick Start</a> •
+  <a href="#docker-deployment">Docker Deployment</a> •
   <a href="#api-endpoints">API Endpoints</a> •
+  <a href="#environment-variables">Environment</a> •
   <a href="#security">Security</a> •
   <a href="#directory-structure">Structure</a>
 </p>
@@ -21,45 +24,50 @@
 
 ## Overview
 
-**Reshift** is a lightweight, high-performance web utility for image and PDF manipulation built with FastAPI and Jinja2. Designed with an **in-memory-first** architecture, all processing occurs directly in RAM (`io.BytesIO`) to minimize disk I/O, ensure speed, and protect user data privacy.
+**Reshift** is a lightweight, privacy-first monolith web utility for image and PDF manipulation built with **FastAPI**, **Jinja2**, **Pillow**, and **PyMuPDF**. Designed with an **in-memory-first** architecture, image processing runs strictly in RAM (`io.BytesIO`), while large PDFs (> 10 MB) use temporary isolated staging in `workspace/tmp/` with immediate post-response cleanup.
 
 ---
 
 ## Features
 
-### Image Processing
+### Image Mode (`PNG`, `JPEG`, `WEBP`)
 
-- **Format Conversion:** Convert images between **PNG**, **JPEG**, and **WEBP**.
-- **Resize & Aspect Ratio:** Custom target width/height with smart aspect ratio preservation.
-- **Quality Control:** Adjustable compression quality slider (1–100%) for JPEG and WEBP outputs.
-- **Batch Processing:** Process up to 20 images simultaneously and download as a single `Reshift-batch.zip` archive.
-- **Live Preview:** Instant image preview with pixel dimensions and size metadata.
+- **All-in-One Pipeline:** Combine crop, resize, format conversion, and quality control in a single request (`All-in-One | Compress | Resize | Convert | Crop`).
+- **Smart Compress:** Format-optimal compression without manual quality tuning:
+  - **JPEG:** `optimize=True, quality=95` (visually lossless).
+  - **WEBP:** `lossless=True, method=6` (maximum lossless compression).
+  - **PNG:** `optimize=True, compress_level=9` (maximum zlib compression).
+  - **Original-Bytes Size Guard:** Automatically returns the original bytes when smart compression does not shrink an unedited same-format image.
+- **Resize & EXIF Orientation Fix:** LANCZOS resampling with aspect-ratio lock (`width`/`height`) plus automatic `ImageOps.exif_transpose()` so portrait smartphone photos never rotate sideways.
+- **Interactive Visual Crop:** Pixel-accurate bounding-box crop (`crop_left`, `crop_top`, `crop_right`, `crop_bottom`) with a rule-of-thirds overlay, 8 resize handles, and Pointer Events support for desktop mouse and mobile touch.
+- **Batch Processing:** Process up to 20 images simultaneously into `Reshift-batch.zip` with collision-safe filenames and an empty-batch `HTTP 400` guard.
 
-### PDF Processing
+### PDF Mode (Up to 50 MB)
 
-- **PDF Compression:** Compress internal image streams, strip unused metadata, and optimize PDF structure.
-- **Page Splitting:** Split multi-page PDFs into individual single-page PDF files bundled inside a ZIP archive.
-- **Smart Staging:** Small PDFs process entirely in-memory; large PDFs (> 10 MB) utilize temporary staging with automatic cleanup.
+- **PDF Compression:** Strips unused metadata and compresses streams, images, and fonts (`garbage=4, deflate=True`).
+- **Split & Custom Page Range:** Extract all pages or a custom range (e.g. `1-3, 5`) into individual single-page PDFs bundled inside `{stem}-Reshift-pages.zip`.
+- **PDF to Images:** Render all or selected PDF pages at 150 DPI into **PNG** or **JPEG** images inside `{stem}-Reshift-images.zip`.
+- **Merge PDFs:** Combine multiple PDFs (2–20 files) into `Reshift-merged.pdf` with cumulative one-by-one/multi-file upload and an interactive sortable queue (`↑` / `↓` / remove).
 
-### Security & UX
+### UX, SEO, Legal & Error Handling
 
-- **Magic Bytes Validation:** Binary header validation (`\x89PNG`, `\xff\xd8\xff`, `RIFF...WEBP`, `%PDF-`) preventing MIME-spoofing attacks.
-- **Rate Limiting:** Per-IP request limits powered by `slowapi` to prevent abuse.
-- **Modern Responsive UI:** Clean interface with Light/Dark mode toggle and Drag-and-Drop upload support.
-- **Standardized Downloads:** All output files automatically preserve the original filename stem with a `-Reshift` suffix (e.g., `photo-Reshift.png`, `doc-Reshift-pages.zip`).
+- **Before/After Size Savings:** Displays `input → output (-X% saved)` for compressed images and PDFs, plus ZIP output sizes.
+- **Inline Error Banner & Light/Dark Theme:** Non-blocking dismissible error banner and `localStorage`-persisted light/dark mode matching `donnitriosa.my.id`.
+- **SEO & Crawling:** `GET`/`HEAD` support on public routes, `/robots.txt`, `/sitemap.xml`, Open Graph / Twitter Card (`1200×630` `og-image.png`), JSON-LD `WebApplication` metadata, and `NOINDEX` staging toggle.
+- **Legal & Custom 404:** Dedicated `/privacy` and `/terms` pages linked in the footer, plus a Reshift-themed Canvas & Memory Inspector `404` page (`templates/404.html`).
 
 ---
 
 ## Tech Stack
 
-| Category                     | Technology                                       |
-| ---------------------------- | ------------------------------------------------ |
-| **Backend**                  | Python 3.10+, FastAPI, Uvicorn                   |
-| **Frontend**                 | Jinja2 Templates, Vanilla JavaScript, Custom CSS |
-| **Image Processing**         | Pillow (PIL)                                     |
-| **PDF Processing**           | PyMuPDF (fitz)                                   |
-| **Security & Rate Limiting** | slowapi                                          |
-| **Packaging**                | Standard library `zipfile` & `io.BytesIO`        |
+| Category | Technology |
+| --- | --- |
+| **Backend** | Python 3.11, FastAPI, Uvicorn |
+| **Frontend** | Jinja2 Templates, Vanilla JavaScript (Fetch API), Custom CSS |
+| **Image Processing** | Pillow (PIL) |
+| **PDF Processing** | PyMuPDF (`pymupdf` / `fitz`) |
+| **Security & Rate Limiting** | Magic Bytes validation, `slowapi`, 50 MP pixel limit |
+| **Deployment** | Docker (`python:3.11-slim`, non-root `reshift`), Docker Compose, Dokploy + Traefik |
 
 ---
 
@@ -67,14 +75,14 @@
 
 ### Prerequisites
 
-- Python 3.10 or higher
+- Python 3.11+ (`.venv` recommended)
 
-### Installation
+### Local Installation
 
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/user/Reshift.git
+   git clone https://github.com/donnitriosa/Reshift.git
    cd Reshift
    ```
 
@@ -91,56 +99,76 @@
    pip install -r requirements.txt
    ```
 
-4. **Run the application:**
+4. **Configure optional environment overrides:**
+
+   ```bash
+   cp .env.example .env
+   ```
+
+5. **Run the application:**
 
    ```bash
    uvicorn main:app --reload
    ```
 
-5. **Open in browser:**
-   Navigate to `http://127.0.0.1:8000`
+6. **Run tests:**
+
+   ```bash
+   .venv/bin/python -m pytest -q
+   ```
+
+---
+
+## Docker Deployment
+
+Reshift ships as a single non-root container (`Dockerfile` + `docker-compose.yml`) routed behind Dokploy/Traefik with a `1g` memory limit and `/health` probe. See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for the full deployment guide.
+
+```bash
+docker build -t reshift:local .
+docker run --rm -p 8000:8000 reshift:local
+```
 
 ---
 
 ## API Endpoints
 
-| Method | Endpoint             | Description                                              | Rate Limit |
-| ------ | -------------------- | -------------------------------------------------------- | ---------- |
-| `GET`  | `/`                  | Main web UI dashboard                                    | —          |
-| `POST` | `/process/image`     | Process single image (resize, convert, compress)         | 20 / min   |
-| `POST` | `/process/batch`     | Batch process multiple images → returns ZIP archive      | 10 / min   |
-| `POST` | `/process/pdf`       | Compress PDF file & strip metadata                       | 10 / min   |
-| `POST` | `/process/pdf/split` | Split PDF into individual single-page PDFs → returns ZIP | 10 / min   |
+| Method | Endpoint | Description | Rate Limit |
+| --- | --- | --- | --- |
+| `GET`, `HEAD` | `/` | Main web UI | — |
+| `GET`, `HEAD` | `/privacy` | Privacy Policy page | — |
+| `GET`, `HEAD` | `/terms` | Terms &amp; Conditions page | — |
+| `GET`, `HEAD` | `/health` | Container healthcheck (`{"status": "ok"}`) | — |
+| `GET`, `HEAD` | `/robots.txt` | Crawler directives (`NOINDEX`-aware) | — |
+| `GET`, `HEAD` | `/sitemap.xml` | Canonical sitemap (`/`, `/privacy`, `/terms`) | — |
+| `POST` | `/process/image` | Crop, resize, convert, smart/quality compress single image | 20 / min |
+| `POST` | `/process/batch` | Batch process up to `MAX_BATCH_FILES` images → ZIP | 10 / min |
+| `POST` | `/process/pdf` | Compress PDF &amp; strip metadata | 10 / min |
+| `POST` | `/process/pdf/split` | Split PDF (all or `page_range`) → ZIP of single-page PDFs | 10 / min |
+| `POST` | `/process/pdf/merge` | Merge 2+ PDFs into `Reshift-merged.pdf` | 10 / min |
+| `POST` | `/process/pdf/to-images` | Render PDF pages (`PNG`/`JPEG`, optional `page_range`) → ZIP | 10 / min |
 
 ---
 
-## Technical Limits
+## Environment Variables
 
-| Resource                   | Limit                                       |
-| -------------------------- | ------------------------------------------- |
-| Max Image File Size        | **20 MB** per image                         |
-| Max PDF File Size          | **50 MB** per document                      |
-| Max Batch Files            | **20 files** per request                    |
-| PDF Disk Staging Threshold | **10 MB** (files below this stay in-memory) |
+All variables are optional and read from `.env` (or container environment) with defaults in [`.env.example`](.env.example):
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `MAX_FILE_MB` | `20` | Maximum image upload size in MB |
+| `MAX_PDF_MB` | `50` | Maximum PDF upload size (and merge total size) in MB |
+| `MAX_BATCH_FILES` | `20` | Maximum files per batch image or PDF merge request |
+| `SITE_URL` | `https://reshift.donnitriosa.my.id` | Canonical URL for meta tags, `sitemap.xml`, and `robots.txt` |
+| `NOINDEX` | `false` | Set `true` on staging to emit `X-Robots-Tag: noindex, nofollow` and hide sitemap |
 
 ---
 
 ## Security
 
-Reshift implements defense-in-depth measures to handle untrusted file uploads safely:
-
-1. **Binary Signature Verification (Magic Bytes):**
-   Validation is performed on raw byte headers before handing data to Pillow or PyMuPDF, rejecting disguised malicious payloads.
-
-   | Format   | Magic Bytes Signature |
-   | -------- | --------------------- |
-   | **PNG**  | `\x89PNG\r\n\x1a\n`   |
-   | **JPEG** | `\xff\xd8\xff`        |
-   | **WEBP** | `RIFF....WEBP`        |
-   | **PDF**  | `%PDF-`               |
-
-2. **Per-IP Rate Limiting:** Rate limits enforced at router level return HTTP 429 when threshold is exceeded.
-3. **Automatic Workspace Cleanup:** Temporary staging files in `workspace/tmp/` are automatically wiped on application startup via FastAPI lifespan hooks and cleaned up immediately post-response using `BackgroundTask`.
+1. **Magic Bytes Signature Validation (`utils/validators.py`):** Verifies raw binary headers (`\x89PNG\r\n\x1a\n`, `\xff\xd8\xff`, `RIFF....WEBP`, `%PDF-`) before handing payloads to Pillow or PyMuPDF.
+2. **Decompression Bomb Protection:** Caps `Image.MAX_IMAGE_PIXELS` at `50_000_000` (50 MP) in `utils/image_processor.py`, returning `HTTP 400` on oversized payloads.
+3. **Per-IP Rate Limiting:** Enforced via `slowapi` (`20/minute` image, `10/minute` batch/PDF) with proxy IP forwarding (`--proxy-headers --forwarded-allow-ips "*"`).
+4. **Automatic Staging Purge:** `workspace/tmp/` is wiped on startup (`cleanup_tmp()`) and staged PDFs (> 10 MB) are deleted immediately after delivery via `BackgroundTask`.
 
 ---
 
@@ -148,25 +176,31 @@ Reshift implements defense-in-depth measures to handle untrusted file uploads sa
 
 ```text
 Reshift/
-├── main.py              # Application entry point & FastAPI routes
-├── requirements.txt     # Python dependencies
-├── README.md            # Project documentation
-├── utils/               # Core processing engines
-│   ├── image_processor.py   # Pillow image manipulation
-│   ├── pdf_processor.py     # PyMuPDF compression & splitting
-│   └── validators.py        # Magic bytes validation logic
-├── static/              # Static frontend assets
-│   ├── css/
-│   │   └── style.css        # Responsive styling (Light/Dark mode)
-│   ├── image/               # App logo & favicons
-│   │   ├── logo.png
-│   │   └── favicon.ico
-│   └── js/
-│       └── main.js          # Drag-and-drop & Fetch API integration
-├── templates/           # HTML templates
-│   └── index.html       # Single Page Interface
-└── workspace/
-    └── tmp/             # Temporary staging for large PDFs (auto-cleared)
+├── main.py                  # FastAPI entry point, routes, SEO & custom 404 handler
+├── requirements.txt         # Python dependencies
+├── Dockerfile               # python:3.11-slim container (non-root user reshift)
+├── docker-compose.yml       # Production compose service with dokploy-network
+├── .env.example             # Documented runtime configuration defaults
+├── TASKS.md                 # Project roadmap & completion tracker
+├── docs/
+│   ├── ARCHITECTURE.md      # Module map, data flow & security overview
+│   ├── WORKFLOWS.md         # Image & PDF processing pipelines
+│   └── DEPLOYMENT.md        # Local Docker & Dokploy setup guide
+├── utils/
+│   ├── image_processor.py   # Pillow crop, resize, EXIF fix, smart compress & 50 MP cap
+│   ├── pdf_processor.py     # PyMuPDF compress, page-range split, merge & render to images
+│   └── validators.py        # Binary magic-bytes signature validation
+├── static/
+│   ├── css/style.css        # Responsive light/dark theme styling
+│   ├── image/               # Redesigned vector logo.svg, logo.png, favicon.ico, og-image.png
+│   └── js/main.js           # Drag-and-drop, interactive Pointer crop, Fetch API & queue UI
+├── templates/
+│   ├── index.html           # Main utility UI + SEO metadata
+│   ├── privacy.html         # Privacy Policy page (/privacy)
+│   ├── terms.html           # Terms & Conditions page (/terms)
+│   └── 404.html             # Canvas & Memory Inspector 404 page
+├── tests/                   # Pytest unit & integration suite
+└── workspace/tmp/           # Temporary staging for PDFs > 10 MB (auto-purged)
 ```
 
 ---
