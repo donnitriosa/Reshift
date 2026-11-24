@@ -1,0 +1,25 @@
+name: Purge Cloudflare Cache
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  purge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Dokploy deploy
+        run: sleep 45
+
+      - name: Purge Reshift cached URLs
+        env:
+          CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        run: |
+          response=$(curl -fsS -X POST "https://api.cloudflare.com/client/v4/zones/${CF_ZONE_ID}/purge_cache" \
+            -H "Authorization: Bearer ${CF_API_TOKEN}" \
+            -H "Content-Type: application/json" \
+            --data '{"files":["https://reshift.donnitriosa.my.id/","https://reshift.donnitriosa.my.id/privacy","https://reshift.donnitriosa.my.id/terms","https://reshift.donnitriosa.my.id/robots.txt","https://reshift.donnitriosa.my.id/sitemap.xml","https://reshift.donnitriosa.my.id/static/css/style.css","https://reshift.donnitriosa.my.id/static/js/main.js","https://reshift.donnitriosa.my.id/static/image/logo.svg","https://reshift.donnitriosa.my.id/static/image/og-image.png"]}')
+          echo "$response"
+          echo "$response" | grep -q '"success":true'
